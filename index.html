@@ -1,48 +1,2578 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#171717"><title>Wardrobe Studio</title><style>
-:root{--bg:#101112;--panel:#1a1b1d;--panel2:#222427;--text:#f2f2f0;--muted:#a8aaad;--line:#35373b;--accent:#d8d0c2;--good:#b9d7bd;--best:#b6d6c4;--avoid:#e0b4ae}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,sans-serif}main{max-width:940px;margin:auto;padding:22px 15px 44px}.eyebrow{color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-size:.72rem}h1{font-size:clamp(2rem,7vw,3.2rem);line-height:1.08;margin:.4rem 0 .6rem;letter-spacing:-.04em}h2{font-size:1.1rem;margin:0 0 12px}p{color:var(--muted);margin:.3rem 0}.panel{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:17px;margin-top:15px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field label{display:block;color:var(--muted);font-size:.84rem;margin-bottom:5px}select,input{width:100%;min-height:45px;background:#111213;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit}button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;cursor:pointer}button.primary{background:var(--accent);color:#171717;font-weight:650}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.preview{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.swatch{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#141516}.color{height:84px;display:flex;align-items:end;padding:9px;color:#fff;text-shadow:0 1px 5px #000;font-size:.8rem}.swatch p{padding:9px 11px;color:var(--text);font-weight:600}.result{background:#111213;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:13px}.pill{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:2px 8px;font-size:.75rem;margin-right:6px}.best{color:var(--best)}.good{color:#e3d2a8}.avoid{color:var(--avoid)}.unrated{color:var(--muted)}.item-list{display:grid;gap:8px;margin-top:12px}.item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px}.item small,.note{color:var(--muted);font-size:.82rem}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}.stat{background:#111213;border:1px solid var(--line);border-radius:11px;padding:11px}.stat strong{display:block;font-size:1.3rem}.stat span{font-size:.76rem;color:var(--muted)}hr{border:0;border-top:1px solid var(--line);margin:14px 0}@media(max-width:560px){.grid{grid-template-columns:1fr}.panel{padding:14px}.color{height:75px}}
-</style></head><body><main><div class="eyebrow">Personal wardrobe tool</div><h1>Wardrobe Studio</h1><p>Generate outfits from your wardrobe, manage clothing and tune the colour direction.</p>
-<section class="panel"><h2>Automatic outfit generator</h2><div class="grid">
-<div class="field"><label for="day">Day / occasion</label><select id="day"><option>Any day</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option><option>Casual</option><option>College</option></select></div>
-<div class="field"><label for="count">Number of outfits</label><select id="count"><option value="3">3 outfits</option><option value="5" selected>5 outfits</option><option value="7">7 outfits</option><option value="10">10 outfits</option><option value="all">All available combinations</option></select></div>
-<div class="field"><label for="topType">Top type</label><select id="topType"><option value="any">Automatic mix</option><option value="shirt">Shirt</option><option value="sweatshirt">Sweatshirt</option></select></div>
-<div class="field"><label for="bottomType">Bottom type</label><select id="bottomType"><option value="any">Automatic mix</option><option value="trouser">Trousers</option><option value="cargo">Cargos</option></select></div>
-<div class="field"><label for="palette">Overall outfit colour preference</label><select id="palette"><option value="any">Any balanced palette</option><option value="dark">Dark / monochrome</option><option value="neutral">Neutral and understated</option><option value="earthy">Earthy / muted</option><option value="cool">Cool tones</option><option value="warm">Warm tones / contrast</option></select></div>
-</div><div class="actions"><button class="primary" id="generate">Generate outfits</button><button id="regenerate">Generate different outfits</button></div><div id="outfits" class="item-list" aria-live="polite"></div><p class="note">No shirt–bottom combination repeats within the same calendar week during this open session. Used-outfit history is not saved. Reloading the page clears the temporary weekly block list.</p></section>
-<section class="panel"><h2>Clothing-specific colour preferences</h2>
-<p>Set a separate colour direction for each clothing category and occasion. These settings are independent of the overall outfit colour preference above.</p>
-<div class="grid">
-<div class="field"><label for="prefOccasion">Occasion for these preferences</label><select id="prefOccasion"><option value="Casual">Casual</option><option value="College" selected>College</option><option value="Formal">Formal</option><option value="Party">Party / evening</option><option value="Outdoor">Outdoor</option></select></div>
-<div class="field"><label for="prefShirt">Shirt colour preference</label><select id="prefShirt" data-pref-category="shirt"><option value="any">Any colour</option><option value="dark">Dark / monochrome</option><option value="neutral">Neutral / understated</option><option value="earthy">Earthy / muted</option><option value="cool">Cool tones</option><option value="warm">Warm tones / contrast</option><option value="light">Light / bright</option><optgroup label="Specific colour (fixed for this item)"><option value="any">No fixed colour</option><option value="color:black">Black</option><option value="color:white">White</option><option value="color:blue">Blue</option><option value="color:navy">Navy blue</option><option value="color:grey">Grey</option><option value="color:green">Green</option><option value="color:olive">Olive</option><option value="color:brown">Brown</option><option value="color:beige">Beige / taupe</option><option value="color:pink">Pink</option><option value="color:red">Red</option><option value="color:yellow">Yellow</option><option value="color:teal">Teal</option><option value="color:purple">Purple</option></optgroup></select></div>
-<div class="field"><label for="prefTrouser">Trouser colour preference</label><select id="prefTrouser" data-pref-category="trouser"><option value="any">Any colour</option><option value="dark">Dark / monochrome</option><option value="neutral">Neutral / understated</option><option value="earthy">Earthy / muted</option><option value="cool">Cool tones</option><option value="warm">Warm tones / contrast</option><option value="light">Light / bright</option><optgroup label="Specific colour (fixed for this item)"><option value="any">No fixed colour</option><option value="color:black">Black</option><option value="color:white">White</option><option value="color:blue">Blue</option><option value="color:navy">Navy blue</option><option value="color:grey">Grey</option><option value="color:green">Green</option><option value="color:olive">Olive</option><option value="color:brown">Brown</option><option value="color:beige">Beige / taupe</option><option value="color:pink">Pink</option><option value="color:red">Red</option><option value="color:yellow">Yellow</option><option value="color:teal">Teal</option><option value="color:purple">Purple</option></optgroup></select></div>
-<div class="field"><label for="prefSweatshirt">Sweatshirt colour preference</label><select id="prefSweatshirt" data-pref-category="sweatshirt"><option value="any">Any colour</option><option value="dark">Dark / monochrome</option><option value="neutral">Neutral / understated</option><option value="earthy">Earthy / muted</option><option value="cool">Cool tones</option><option value="warm">Warm tones / contrast</option><option value="light">Light / bright</option><optgroup label="Specific colour (fixed for this item)"><option value="any">No fixed colour</option><option value="color:black">Black</option><option value="color:white">White</option><option value="color:blue">Blue</option><option value="color:navy">Navy blue</option><option value="color:grey">Grey</option><option value="color:green">Green</option><option value="color:olive">Olive</option><option value="color:brown">Brown</option><option value="color:beige">Beige / taupe</option><option value="color:pink">Pink</option><option value="color:red">Red</option><option value="color:yellow">Yellow</option><option value="color:teal">Teal</option><option value="color:purple">Purple</option></optgroup></select></div>
-<div class="field"><label for="prefCargo">Cargo colour preference</label><select id="prefCargo" data-pref-category="cargo"><option value="any">Any colour</option><option value="dark">Dark / monochrome</option><option value="neutral">Neutral / understated</option><option value="earthy">Earthy / muted</option><option value="cool">Cool tones</option><option value="warm">Warm tones / contrast</option><option value="light">Light / bright</option><optgroup label="Specific colour (fixed for this item)"><option value="any">No fixed colour</option><option value="color:black">Black</option><option value="color:white">White</option><option value="color:blue">Blue</option><option value="color:navy">Navy blue</option><option value="color:grey">Grey</option><option value="color:green">Green</option><option value="color:olive">Olive</option><option value="color:brown">Brown</option><option value="color:beige">Beige / taupe</option><option value="color:pink">Pink</option><option value="color:red">Red</option><option value="color:yellow">Yellow</option><option value="color:teal">Teal</option><option value="color:purple">Purple</option></optgroup></select></div>
-</div><p class="note" id="categoryPrefNote">Preferences are saved on this device. Use colour-direction choices for broad styling, or choose a specific colour (e.g. black, white or blue) when that garment’s colour is already decided. Choose an occasion above to edit that occasion’s settings.</p></section>
-<section class="panel"><h2>Selected outfit</h2><div class="grid"><div class="field"><label for="selTop">Top</label><select id="selTop"></select></div><div class="field"><label for="selBottom">Bottom</label><select id="selBottom"></select></div></div><div class="preview"><div class="swatch"><div class="color" id="topColor"></div><p id="topName"></p></div><div class="swatch"><div class="color" id="bottomColor"></div><p id="bottomName"></p></div></div><div class="result" id="assessment"></div><div class="stats"><div class="stat"><strong id="topCount">12</strong><span>Shirts + sweatshirts</span></div><div class="stat"><strong id="bottomCount">10</strong><span>Trousers + cargos</span></div><div class="stat"><strong id="combos">120</strong><span>Possible combinations</span></div></div></section>
-<section class="panel"><h2>Add clothing</h2><div class="grid"><div class="field"><label for="newName">Item name / colour</label><input id="newName" placeholder="e.g. Chocolate brown"></div><div class="field"><label for="newType">Category</label><select id="newType"><option value="shirt">Shirt</option><option value="trouser">Trousers</option><option value="sweatshirt">Sweatshirt</option><option value="cargo">Cargos</option></select></div><div class="field"><label for="newHex">Optional colour preview (HEX)</label><input id="newHex" placeholder="#6B4226" maxlength="7"></div></div><div class="actions"><button class="primary" id="add">Add item</button><button id="reset">Reset starter wardrobe</button></div><p class="note" id="message"></p></section>
-<section class="panel"><h2>Manage your wardrobe</h2><div id="inventory" class="grid"></div><div class="actions"><button id="export">Export wardrobe backup</button><button id="import">Import backup</button><input type="file" id="file" accept=".json,application/json" hidden></div><p class="note">Clothing edits are saved locally in this browser. Outfit-use history is not stored. Export a backup before clearing browser data or changing devices.</p></section>
-<p class="note">Colour guidance is inspired by Sanzo Wada’s <i>A Dictionary of Color Combinations</i>: hue relationships, muted/vivid balance, neutrals, contrast and proportion. Ratings are practical estimates, not exact reproductions of every palette in the book.</p></main>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0e12">
+  <title>Sanzo Wada — Wardrobe Studio</title>
+  <style>
+    :root {
+      --bg: #0c0e12;
+      --panel: #15171d;
+      --panel-inner: #1c1f26;
+      --panel-hover: #222630;
+      --line: #262a34;
+      --line-subtle: #1f222a;
+      --text: #f3f4f6;
+      --muted: #8c909b;
+      --accent: #2563eb;
+      --accent-glow: rgba(37, 99, 235, 0.25);
+      --accent-soft: #1d325e;
+      --peak: #f59e0b;
+      --peak-bg: rgba(245, 158, 11, 0.12);
+      --peak-border: rgba(245, 158, 11, 0.35);
+      --good: #34d399;
+      --good-bg: rgba(52, 211, 153, 0.12);
+      --good-border: rgba(52, 211, 153, 0.3);
+      --mid: #94a3b8;
+      --mid-bg: rgba(148, 163, 184, 0.12);
+      --mid-border: rgba(148, 163, 184, 0.25);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+      line-height: 1.5;
+      padding-bottom: 60px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 16px 14px;
+    }
+
+    /* Top Header */
+    header {
+      padding: 6px 0 16px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 18px;
+    }
+
+    .top-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .brand-eyebrow {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .app-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      line-height: 1.15;
+    }
+
+    .app-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Fixed Navigation Tabs (Grid layout: 4 cols on desktop, 2x2 on mobile) */
+    .view-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: var(--panel);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      margin-bottom: 20px;
+    }
+
+    .view-tab-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      padding: 10px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+      white-space: normal;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+    }
+
+    .view-tab-btn:hover {
+      color: var(--text);
+      background: var(--panel-hover);
+    }
+
+    .view-tab-btn.active {
+      background: var(--panel-inner);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.14);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    @media (max-width: 640px) {
+      .view-tabs {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+      .view-tab-btn {
+        padding: 9px 6px;
+        font-size: 0.8rem;
+        min-height: 42px;
+      }
+    }
+
+    /* Metrics 2x2 Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .metric-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 13px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .metric-label {
+      font-size: 0.74rem;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    /* Filter Panel */
+    .filter-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .filter-group-title {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .pills-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 3px;
+      scrollbar-width: none;
+    }
+    .pills-scroll::-webkit-scrollbar { display: none; }
+
+    .pill-btn {
+      border: 1px solid var(--line);
+      background: var(--panel-inner);
+      color: var(--muted);
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 0.79rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .pill-btn:hover {
+      border-color: #3b4252;
+      color: var(--text);
+    }
+
+    .pill-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .pill-btn.tier-peak.active {
+      background: var(--peak);
+      border-color: var(--peak);
+      color: #111215;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+    }
+    .pill-btn.tier-good.active {
+      background: var(--good);
+      border-color: var(--good);
+      color: #111215;
+      box-shadow: 0 0 12px rgba(52, 211, 153, 0.35);
+    }
+    .pill-btn.tier-mid.active {
+      background: var(--mid);
+      border-color: var(--mid);
+      color: #111215;
+    }
+
+    .select-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    select, input {
+      width: 100%;
+      min-height: 42px;
+      background: var(--panel-inner);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.86rem;
+      font-family: inherit;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    .btn-secondary {
+      background: var(--panel-inner);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .btn-secondary:hover {
+      background: var(--panel-hover);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 10px var(--accent-glow);
+      transition: opacity 0.15s ease;
+    }
+    .btn-primary:hover {
+      opacity: 0.93;
+    }
+
+    .guarantee-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      color: #6ee7b7;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    /* Separated Week Sections */
+    .week-sections-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .week-group-block {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 18px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .week-group-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .week-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .week-badge-pill {
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 6px var(--accent-glow);
+    }
+
+    .week-theme-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .week-resting-banner {
+      font-size: 0.78rem;
+      color: #93c5fd;
+      background: rgba(37, 99, 235, 0.09);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+
+    /* List Layout for Outfit Cards */
+    .week-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .outfit-card {
+      background: var(--panel-inner);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 13px 15px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .outfit-card:hover {
+      transform: translateY(-2px);
+      border-color: #3e4453;
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+    }
+
+    .card-day-title {
+      font-weight: 800;
+      color: #f3f4f6;
+      letter-spacing: -0.01em;
+      font-size: 0.86rem;
+    }
+
+    .card-leather-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .leather-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    /* Split Swatch Block */
+    .swatch-split-block {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      height: 74px;
+      margin-bottom: 9px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .swatch-top-half, .swatch-bottom-half {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      transition: background 0.15s ease;
+    }
+
+    .swatch-hex-subtle {
+      font-size: 0.72rem;
+      font-family: monospace;
+      opacity: 0.8;
+      font-weight: 500;
+    }
+
+    .card-wada-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #f3f4f6;
+      margin-bottom: 6px;
+      font-style: italic;
+    }
+
+    .card-badges-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: auto;
+    }
+
+    .harmony-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      color: #cbd5e1;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Tier Pills */
+    .tier-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: 0.02em;
+    }
+    .tier-badge.peak { color: var(--peak); background: var(--peak-bg); border: 1px solid var(--peak-border); }
+    .tier-badge.good { color: var(--good); background: var(--good-bg); border: 1px solid var(--good-border); }
+    .tier-badge.mid  { color: var(--mid);  background: var(--mid-bg);  border: 1px solid var(--mid-border); }
+
+    /* Generator Controls Section */
+    .generator-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .generator-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* Embedded Preferences Box inside Generator */
+    .embedded-pref-box {
+      background: var(--panel-inner);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 13px;
+      margin-bottom: 16px;
+    }
+
+    .embedded-pref-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--line-subtle);
+    }
+
+    /* Inventory Section */
+    .inventory-section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .inventory-category-box h3 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .inventory-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .inv-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel-inner);
+      border: 1px solid var(--line-subtle);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 0.82rem;
+    }
+
+    .inv-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: middle;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .inv-remove-btn {
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      font-size: 0.78rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .inv-remove-btn:hover {
+      color: #f87171;
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    /* Stats Panel */
+    .stats-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-bars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+
+    .stat-name {
+      width: 115px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stat-bar-track {
+      flex: 1;
+      height: 7px;
+      background: var(--panel-inner);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .stat-count-num {
+      width: 28px;
+      text-align: right;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    /* Inspection Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 9, 12, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--panel);
+      border: 1px solid #343946;
+      border-radius: var(--radius-lg);
+      max-width: 460px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      animation: popIn 0.16s ease;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-swatches-view {
+      height: 125px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-swatch-half {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .modal-leather-seam {
+      height: 8px;
+      width: 100%;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      padding: 18px;
+    }
+
+    .modal-header-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .modal-outfit-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 2px;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-wada-name {
+      font-size: 0.92rem;
+      color: #93c5fd;
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+
+    .modal-rationale-box {
+      background: var(--panel-inner);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px 13px;
+      font-size: 0.85rem;
+      color: #e5e7eb;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      font-size: 0.8rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 600px) {
+      .generator-grid, .inventory-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .app-title { font-size: 1.35rem; }
+      .week-group-block { padding: 14px 12px; }
+      .swatch-top-half, .swatch-bottom-half { padding: 0 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="top-meta">
+      <span class="brand-eyebrow">Sanzo Wada Colour System</span>
+      <span class="guarantee-badge">🛡️ Strict 0-Repeat Weekly Engine</span>
+    </div>
+    <h1 class="app-title">Wardrobe Studio</h1>
+    <p class="app-subtitle">Curated 4-Week Wada Rotation &amp; All-Combinations Directory</p>
+  </header>
+
+  <!-- View Switcher Tabs (2x2 on mobile, 4-col on desktop) -->
+  <nav class="view-tabs" role="tablist">
+    <button class="view-tab-btn active" id="tabBtnMatrix" onclick="switchView('matrix')">
+      📅 4-Week Schedule
+    </button>
+    <button class="view-tab-btn" id="tabBtnDirectory" onclick="switchView('directory')">
+      🗂️ All Combinations
+    </button>
+    <button class="view-tab-btn" id="tabBtnGenerator" onclick="switchView('generator')">
+      ⚡ Outfit Generator
+    </button>
+    <button class="view-tab-btn" id="tabBtnManage" onclick="switchView('manage')">
+      👔 Wardrobe &amp; Prefs
+    </button>
+  </nav>
+
+  <!-- ================= VIEW 1: SANZO WADA 4-WEEK SCHEDULE ================= -->
+  <section id="viewMatrix">
+    <!-- Top 2x2 Metrics Grid -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">Shown Outfits</span>
+        <span class="metric-value" id="matrixShownCount">20 / 20</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Schedule Mode</span>
+        <span class="metric-value" id="matrixModeLabel" style="font-size:1.15rem;">All Clothes Mix</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Available Tops</span>
+        <span class="metric-value" id="matrixTopCountBadge">12 Items</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Available Bottoms</span>
+        <span class="metric-value" id="matrixBottomCountBadge">10 Items</span>
+      </div>
+    </div>
+
+    <!-- Filter Control Panel with Garment Scope (Shirts/Trousers vs All) -->
+    <div class="filter-panel">
+      <!-- NEW: Option to choose from Shirts, Trousers, Sweatshirts, Cargos, or All -->
+      <div style="background:var(--panel-inner);border:1px solid var(--line);border-radius:10px;padding:12px;">
+        <div class="filter-group-title" style="margin-bottom:8px;color:#93c5fd;">Garment Type Selection for 4-Week Schedule</div>
+        <div class="generator-grid" style="margin-bottom:0;">
+          <div class="field">
+            <label for="matrixTopFilter">Top Garment Selection</label>
+            <select id="matrixTopFilter">
+              <option value="all" selected>All Tops (Shirts + Sweatshirts)</option>
+              <option value="shirt">Shirts Only (7 Full-Sleeve Classic)</option>
+              <option value="sweatshirt">Sweatshirts Only (5 Athletic / Casual)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="matrixBottomFilter">Bottom Garment Selection</label>
+            <select id="matrixBottomFilter">
+              <option value="all" selected>All Bottoms (Trousers + Cargos)</option>
+              <option value="trouser">Trousers Only (6 Formal Trousers)</option>
+              <option value="cargo">Cargos Only (4 Utility Cargos)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="filter-group-title">Week</div>
+        <div class="pills-scroll" id="weekPills">
+          <button class="pill-btn active" data-week="all">All Weeks</button>
+          <button class="pill-btn" data-week="1">Week 1</button>
+          <button class="pill-btn" data-week="2">Week 2</button>
+          <button class="pill-btn" data-week="3">Week 3</button>
+          <button class="pill-btn" data-week="4">Week 4</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="filter-group-title">Harmony Principle</div>
+        <div class="pills-scroll" id="harmonyPills">
+          <button class="pill-btn active" data-harmony="all">All Types</button>
+          <button class="pill-btn" data-harmony="Achromatic Contrast">Achromatic</button>
+          <button class="pill-btn" data-harmony="Warm-Cool Balance">Warm-Cool</button>
+          <button class="pill-btn" data-harmony="Tonal Layering">Tonal</button>
+          <button class="pill-btn" data-harmony="Anchored Chromatic">Anchored</button>
+          <button class="pill-btn" data-harmony="Complementary Contrast">Complementary</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="filter-group-title">Highlight Specific Garment</div>
+        <div class="select-row">
+          <select id="matrixGarmentFilter">
+            <option value="all">All Garments in Active Scope</option>
+          </select>
+          <button class="btn-secondary" id="resetMatrixFilters">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEPARATED WEEKS CONTAINER (Presented in list fashion) -->
+    <main class="week-sections-container" id="matrixWeekSectionsContainer"></main>
+
+    <!-- Monthly Rotation Balance Panel -->
+    <section class="stats-panel">
+      <div class="filter-group-title">Monthly Garment Rotation Distribution</div>
+      <div class="stat-bars-grid">
+        <div>
+          <p style="font-size:0.75rem;font-weight:700;color:var(--muted);margin-bottom:8px;">TOPS IN ACTIVE ROTATION</p>
+          <div id="shirtStatBars"></div>
+        </div>
+        <div>
+          <p style="font-size:0.75rem;font-weight:700;color:var(--muted);margin-bottom:8px;">BOTTOMS IN ACTIVE ROTATION</p>
+          <div id="trouserStatBars"></div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ================= VIEW 2: ALL COMBINATIONS DIRECTORY (PEAK / GOOD / MID) ================= -->
+  <section id="viewDirectory" style="display:none;">
+    <div class="generator-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h2 style="font-size:1.05rem;font-weight:800;">Sanzo Wada Japanese Colour Index</h2>
+        <span class="guarantee-badge" id="dirTotalCountBadge">120 Combinations</span>
+      </div>
+      <p style="font-size:0.83rem;color:var(--muted);margin-bottom:14px;">
+        Every possible pairing across your entire wardrobe evaluated strictly according to Sanzo Wada’s color dictionary into <strong>PEAK (S-Tier)</strong>, <strong>GOOD (A-Tier)</strong>, and <strong>MID (B-Tier)</strong>.
+      </p>
+
+      <!-- Tier Filters -->
+      <div>
+        <div class="filter-group-title">Category / Tier</div>
+        <div class="pills-scroll" id="dirTierPills">
+          <button class="pill-btn active" data-tier="all" id="pillTierAll">All Combinations (<span id="countTierAll">120</span>)</button>
+          <button class="pill-btn tier-peak" data-tier="PEAK" id="pillTierPeak">🔥 PEAK Tier (<span id="countTierPeak">52</span>)</button>
+          <button class="pill-btn tier-good" data-tier="GOOD" id="pillTierGood">✨ GOOD Tier (<span id="countTierGood">54</span>)</button>
+          <button class="pill-btn tier-mid" data-tier="MID" id="pillTierMid">⚖️ MID Tier (<span id="countTierMid">14</span>)</button>
+        </div>
+      </div>
+
+      <!-- Garment & Category Selectors -->
+      <div class="generator-grid" style="margin-top:14px;margin-bottom:0;">
+        <div class="field">
+          <label for="dirTopTypeFilter">Top Filter</label>
+          <select id="dirTopTypeFilter">
+            <option value="all">All Tops (Shirts + Sweatshirts)</option>
+            <option value="shirt">Shirts Only (7)</option>
+            <option value="sweatshirt">Sweatshirts Only (5)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="dirBottomTypeFilter">Bottom Filter</label>
+          <select id="dirBottomTypeFilter">
+            <option value="all">All Bottoms (Trousers + Cargos)</option>
+            <option value="trouser">Trousers Only (6)</option>
+            <option value="cargo">Cargos Only (4)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Combinations List Output -->
+    <div class="week-cards-list" id="directoryCombinationsList"></div>
+  </section>
+
+  <!-- ================= VIEW 3: SMART OUTFIT GENERATOR WITH INLINE COLOUR PREFERENCES ================= -->
+  <section id="viewGenerator" style="display:none;">
+    <div class="generator-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h2 style="font-size:1.05rem;font-weight:800;">Strict No-Repeat Generator</h2>
+        <span class="guarantee-badge">Zero Same-Colour Duplicates In Week</span>
+      </div>
+      <p style="font-size:0.83rem;color:var(--muted);margin-bottom:14px;">
+        Generates daily outfits for a week considering all clothes and your custom color preferences. Guaranteed: no shirt or trouser color will repeat across any 2 days in the same week.
+      </p>
+
+      <!-- Main Schedule Setup -->
+      <div class="generator-grid">
+        <div class="field">
+          <label for="genDaysCount">Week Format / Days Count</label>
+          <select id="genDaysCount">
+            <option value="5" selected>5 Days (Mon – Fri Academic Week)</option>
+            <option value="3">3 Days (Selected Weekdays)</option>
+            <option value="6">6 Days (Mon – Sat)</option>
+            <option value="7">7 Days (Full Calendar Week)</option>
+            <option value="all">All Available Non-Repeating Combos</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="genOccasion">Occasion / Context</label>
+          <select id="genOccasion">
+            <option value="College" selected>College / Academic</option>
+            <option value="Casual">Casual / Weekend</option>
+            <option value="Formal">Formal / Presentations</option>
+            <option value="Party">Party / Evening</option>
+            <option value="Outdoor">Outdoor / Field</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="genTierFilter">Sanzo Wada Tier Filter</label>
+          <select id="genTierFilter">
+            <option value="peak_good" selected>🔥 PEAK &amp; ✨ GOOD (Recommended)</option>
+            <option value="peak">🔥 PEAK Only (Pure Wada Kimono S-Tier)</option>
+            <option value="all">All Tiers (Including MID)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="genPalette">Overall Palette Direction</label>
+          <select id="genPalette">
+            <option value="any">Any Balanced Palette (Wada Harmony)</option>
+            <option value="dark">Dark / Monochrome</option>
+            <option value="neutral">Neutral &amp; Understated</option>
+            <option value="earthy">Earthy / Muted (Sage, Olive, Taupe)</option>
+            <option value="cool">Cool Tones (Navy, Slate, Teal)</option>
+            <option value="warm">Warm Tones &amp; Contrast (Cream, Dusty Pink)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="genTopType">Top Category Mix</label>
+          <select id="genTopType">
+            <option value="any">Automatic Mix (Shirts &amp; Sweatshirts)</option>
+            <option value="shirt">Shirts Only</option>
+            <option value="sweatshirt">Sweatshirts Only</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="genBottomType">Bottom Category Mix</label>
+          <select id="genBottomType">
+            <option value="any">Automatic Mix (Trousers &amp; Cargos)</option>
+            <option value="trouser">Trousers Only</option>
+            <option value="cargo">Cargos Only</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- INLINE COLOUR PREFERENCES DIRECTLY IN GENERATOR -->
+      <div class="embedded-pref-box">
+        <div class="embedded-pref-header">
+          <span style="font-size:0.78rem;font-weight:700;color:#93c5fd;text-transform:uppercase;letter-spacing:0.04em;">
+            Garment Colour Preferences (<span id="genOccasionLabel">College</span>)
+          </span>
+          <span style="font-size:0.74rem;color:var(--muted);">Affects outfit rankings &bull; Auto-saved</span>
+        </div>
+
+        <div class="generator-grid" style="margin-bottom:0;">
+          <div class="field">
+            <label for="genPrefShirt">Shirt Colour Rule</label>
+            <select id="genPrefShirt" class="pref-live-input" data-pref-key="shirt">
+              <option value="any">Any Colour</option>
+              <option value="dark">Dark / Monochrome</option>
+              <option value="neutral">Neutral / Understated</option>
+              <option value="earthy">Earthy / Muted</option>
+              <option value="cool">Cool Tones</option>
+              <option value="warm">Warm Tones / Contrast</option>
+              <option value="light">Light / Bright</option>
+              <optgroup label="Lock Specific Colour">
+                <option value="color:white">White</option>
+                <option value="color:navy">Navy Blue</option>
+                <option value="color:black">Black</option>
+                <option value="color:grey">Grey</option>
+                <option value="color:olive">Olive</option>
+                <option value="color:green">Sage Green</option>
+                <option value="color:pink">Dusty Pink</option>
+                <option value="color:blue">Slate Grey</option>
+                <option value="color:yellow">Cream Yellow</option>
+                <option value="color:beige">Beige / Taupe</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="genPrefTrouser">Trouser Colour Rule</label>
+            <select id="genPrefTrouser" class="pref-live-input" data-pref-key="trouser">
+              <option value="any">Any Colour</option>
+              <option value="dark">Dark / Monochrome</option>
+              <option value="neutral">Neutral / Understated</option>
+              <option value="earthy">Earthy / Muted</option>
+              <option value="cool">Cool Tones</option>
+              <option value="warm">Warm Tones / Contrast</option>
+              <option value="light">Light / Bright</option>
+              <optgroup label="Lock Specific Colour">
+                <option value="color:navy">Navy Blue</option>
+                <option value="color:black">Black</option>
+                <option value="color:grey">Charcoal Grey</option>
+                <option value="color:olive">Olive</option>
+                <option value="color:yellow">Cream Yellow</option>
+                <option value="color:white">Light Grey</option>
+                <option value="color:beige">Beige / Taupe</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="genPrefSweatshirt">Sweatshirt Colour Rule</label>
+            <select id="genPrefSweatshirt" class="pref-live-input" data-pref-key="sweatshirt">
+              <option value="any">Any Colour</option>
+              <option value="dark">Dark / Monochrome</option>
+              <option value="earthy">Earthy / Muted</option>
+              <option value="cool">Cool Tones</option>
+              <optgroup label="Lock Specific Colour">
+                <option value="color:teal">Teal</option>
+                <option value="color:black">Black</option>
+                <option value="color:olive">Olive</option>
+                <option value="color:navy">Dark Blue</option>
+                <option value="color:grey">Grey</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="genPrefCargo">Cargo Colour Rule</label>
+            <select id="genPrefCargo" class="pref-live-input" data-pref-key="cargo">
+              <option value="any">Any Colour</option>
+              <option value="dark">Dark / Monochrome</option>
+              <option value="earthy">Earthy / Muted</option>
+              <option value="cool">Cool Tones</option>
+              <optgroup label="Lock Specific Colour">
+                <option value="color:olive">Olive Cargo</option>
+                <option value="color:black">Black Cargo</option>
+                <option value="color:green">Muted Olive Cargo</option>
+                <option value="color:beige">Light Taupe Cargo</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <button class="btn-primary" id="btnGenerateWeekly">Generate Outfits (No Duplicates)</button>
+        <button class="btn-secondary" id="btnRegenerateWeekly">Shuffle Different Outfits</button>
+      </div>
+      <p id="genNoticeText" style="font-size:0.8rem;color:var(--muted);margin-top:10px;"></p>
+    </div>
+
+    <!-- Generated Outfits Output in List Layout -->
+    <div class="week-cards-list" id="generatedOutfitsList"></div>
+  </section>
+
+  <!-- ================= VIEW 4: WARDROBE & COLOUR PREFERENCES ================= -->
+  <section id="viewManage" style="display:none;">
+    <!-- FULL CLOTHING-SPECIFIC COLOUR PREFERENCES PANEL -->
+    <div class="generator-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <h2 style="font-size:1.05rem;font-weight:800;">Clothing-Specific Colour Preferences</h2>
+        <span class="guarantee-badge">Synchronized Settings</span>
+      </div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;">
+        Set broad colour directions or lock fixed colours for each category and occasion. Changes here immediately apply in the generator.
+      </p>
+
+      <div class="generator-grid">
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="prefOccasion">Occasion For These Preferences</label>
+          <select id="prefOccasion">
+            <option value="College" selected>College</option>
+            <option value="Casual">Casual</option>
+            <option value="Formal">Formal</option>
+            <option value="Party">Party / Evening</option>
+            <option value="Outdoor">Outdoor</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="prefShirt">Shirt Colour Preference</label>
+          <select id="prefShirt" class="pref-tab-input" data-pref-key="shirt">
+            <option value="any">Any Colour</option>
+            <option value="dark">Dark / Monochrome</option>
+            <option value="neutral">Neutral / Understated</option>
+            <option value="earthy">Earthy / Muted</option>
+            <option value="cool">Cool Tones</option>
+            <option value="warm">Warm Tones / Contrast</option>
+            <option value="light">Light / Bright</option>
+            <optgroup label="Lock Specific Colour">
+              <option value="color:white">White</option>
+              <option value="color:navy">Navy Blue</option>
+              <option value="color:black">Black</option>
+              <option value="color:grey">Grey</option>
+              <option value="color:olive">Olive</option>
+              <option value="color:green">Sage Green</option>
+              <option value="color:pink">Dusty Pink</option>
+              <option value="color:blue">Slate Grey</option>
+              <option value="color:yellow">Cream Yellow</option>
+              <option value="color:brown">Brown</option>
+              <option value="color:beige">Beige / Taupe</option>
+              <option value="color:teal">Teal</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="prefTrouser">Trouser Colour Preference</label>
+          <select id="prefTrouser" class="pref-tab-input" data-pref-key="trouser">
+            <option value="any">Any Colour</option>
+            <option value="dark">Dark / Monochrome</option>
+            <option value="neutral">Neutral / Understated</option>
+            <option value="earthy">Earthy / Muted</option>
+            <option value="cool">Cool Tones</option>
+            <option value="warm">Warm Tones / Contrast</option>
+            <option value="light">Light / Bright</option>
+            <optgroup label="Lock Specific Colour">
+              <option value="color:navy">Navy Blue</option>
+              <option value="color:black">Black</option>
+              <option value="color:grey">Charcoal Grey</option>
+              <option value="color:olive">Olive</option>
+              <option value="color:yellow">Cream Yellow</option>
+              <option value="color:white">Light Grey</option>
+              <option value="color:beige">Beige / Taupe</option>
+              <option value="color:brown">Brown</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="prefSweatshirt">Sweatshirt Colour Preference</label>
+          <select id="prefSweatshirt" class="pref-tab-input" data-pref-key="sweatshirt">
+            <option value="any">Any Colour</option>
+            <option value="dark">Dark / Monochrome</option>
+            <option value="earthy">Earthy / Muted</option>
+            <option value="cool">Cool Tones</option>
+            <optgroup label="Lock Specific Colour">
+              <option value="color:teal">Teal</option>
+              <option value="color:black">Black</option>
+              <option value="color:olive">Olive</option>
+              <option value="color:navy">Dark Blue</option>
+              <option value="color:grey">Grey</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="prefCargo">Cargo Colour Preference</label>
+          <select id="prefCargo" class="pref-tab-input" data-pref-key="cargo">
+            <option value="any">Any Colour</option>
+            <option value="dark">Dark / Monochrome</option>
+            <option value="earthy">Earthy / Muted</option>
+            <option value="cool">Cool Tones</option>
+            <optgroup label="Lock Specific Colour">
+              <option value="color:olive">Olive Cargo</option>
+              <option value="color:black">Black Cargo</option>
+              <option value="color:green">Muted Olive Cargo</option>
+              <option value="color:beige">Light Taupe Cargo</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+      <p id="categoryPrefNote" style="font-size:0.8rem;color:var(--muted);margin-top:10px;">
+        Preferences are saved locally on this device.
+      </p>
+    </div>
+
+    <!-- Add Item Form -->
+    <div class="generator-panel">
+      <h2 style="font-size:1.05rem;font-weight:800;margin-bottom:4px;">Add New Clothing</h2>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:12px;">Expand your wardrobe inventory.</p>
+
+      <div class="generator-grid">
+        <div class="field">
+          <label for="newItemName">Item Name &amp; Shade</label>
+          <input id="newItemName" placeholder="e.g. Cocoa Brown, Olive Drab">
+        </div>
+        <div class="field">
+          <label for="newItemType">Category</label>
+          <select id="newItemType">
+            <option value="shirts">Shirt</option>
+            <option value="trousers">Trousers</option>
+            <option value="sweatshirts">Sweatshirt</option>
+            <option value="cargos">Cargo Pants</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="newItemHex">Hex Colour Code (#RRGGBB)</label>
+          <input id="newItemHex" placeholder="#555D42" maxlength="7">
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <button class="btn-primary" id="btnAddItem">Add To Wardrobe</button>
+        <button class="btn-secondary" id="btnResetWardrobe">Reset Starter Wardrobe</button>
+      </div>
+      <p id="itemActionMessage" style="font-size:0.8rem;color:var(--muted);margin-top:8px;"></p>
+    </div>
+
+    <!-- Inventory Overview -->
+    <div class="inventory-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h2 style="font-size:1.05rem;font-weight:800;">Wardrobe Inventory (22 Items)</h2>
+        <div class="actions-bar">
+          <button class="btn-secondary" id="btnExport">Export Backup (.json)</button>
+          <button class="btn-secondary" id="btnImport">Import Backup</button>
+          <input type="file" id="backupFileInput" accept=".json,application/json" hidden>
+        </div>
+      </div>
+      <div class="inventory-grid" id="inventoryCategoryDisplay"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ================= MODAL INSPECTOR ================= -->
+<div class="modal-overlay" id="inspectorModal">
+  <div class="modal-box">
+    <div class="modal-swatches-view" id="modalSwatchesView"></div>
+    <div class="modal-content">
+      <div class="modal-header-meta">
+        <span id="modalMeta"></span>
+        <span id="modalTierBadge"></span>
+      </div>
+      <h3 class="modal-outfit-title" id="modalTitle"></h3>
+      <div class="modal-wada-name" id="modalWadaName"></div>
+      <div class="modal-rationale-box" id="modalRationale"></div>
+      <div class="modal-footer">
+        <span id="modalLeatherInfo" style="color:var(--muted);"></span>
+        <button class="btn-primary" style="padding:6px 14px;font-size:0.8rem;" id="btnCloseModal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-const starter={shirts:[['Navy Blue','#202D46'],['Grey','#777A7D'],['White','#E8E7E2'],['Dusty Pink','#C99B9C'],['Black','#202124'],['Sage Green','#9AA78C'],['Slate Grey','#59636B']],trousers:[['Navy Blue','#202D46'],['Charcoal Grey','#393B3E'],['Black','#202124'],['Cream Yellow','#D8C98B'],['Light Grey','#C2C4C3'],['Olive','#686B45']],sweatshirts:[['Teal','#317A78'],['Black','#202124'],['Olive','#686B45'],['Dark Blue','#263B59'],['Grey','#777A7D']],cargos:[['Olive Cargo','#686B45'],['Black Cargo','#202124'],['Muted Olive Cargo','#777A55'],['Light Taupe Cargo','#B5A38C']]};
-const $=id=>document.getElementById(id);const defaults=Object.fromEntries(Object.values(starter).flat().map(x=>[x[0],x[1]]));function fresh(){return Object.fromEntries(Object.entries(starter).map(([k,v])=>[k,v.map(([name,hex],i)=>({id:k+i,name,hex}))]))}
-let data;try{data=JSON.parse(localStorage.getItem('wardrobeStudioData'))||fresh();for(let k of Object.keys(starter))if(!Array.isArray(data[k]))data[k]=fresh()[k]}catch(e){data=fresh()}
-function save(){try{localStorage.setItem('wardrobeStudioData',JSON.stringify(data))}catch(e){}}function tops(){return [...data.shirts.map(x=>({...x,kind:'shirt'})),...data.sweatshirts.map(x=>({...x,kind:'sweatshirt'}))]}function bottoms(){return [...data.trousers.map(x=>({...x,kind:'trouser'})),...data.cargos.map(x=>({...x,kind:'cargo'}))]}function fill(id,arr){let el=$(id),old=el.value;el.innerHTML='';arr.forEach(x=>{let o=document.createElement('option');o.value=x.kind+':'+x.id;o.textContent=x.name+(x.kind==='sweatshirt'?' · sweatshirt':x.kind==='cargo'?' · cargo':'');el.append(o)});if([...el.options].some(o=>o.value===old))el.value=old}function get(key,arr){return arr.find(x=>x.kind+':'+x.id===key)||arr[0]}function chosenTop(){return get($('selTop').value,tops())}function chosenBottom(){return get($('selBottom').value,bottoms())}
-function rate(s,b){let known={'Navy Blue':{'Charcoal Grey':'Best','Light Grey':'Best','Olive':'Best','Navy Blue':'Good','Black':'Good','Cream Yellow':'Good'},Grey:{'Navy Blue':'Best',Black:'Best','Charcoal Grey':'Good','Cream Yellow':'Good',Olive:'Good','Light Grey':'Avoid'},White:{'Navy Blue':'Best','Charcoal Grey':'Best',Black:'Best',Olive:'Best','Cream Yellow':'Good','Light Grey':'Avoid'},'Dusty Pink':{'Navy Blue':'Best','Charcoal Grey':'Best',Black:'Best','Cream Yellow':'Good','Light Grey':'Good',Olive:'Good'},Black:{'Cream Yellow':'Best','Light Grey':'Best',Olive:'Best','Navy Blue':'Good','Charcoal Grey':'Good',Black:'Good'},'Sage Green':{'Navy Blue':'Best',Black:'Best','Cream Yellow':'Best','Light Grey':'Best','Charcoal Grey':'Good',Olive:'Good'},'Slate Grey':{'Navy Blue':'Best',Black:'Best','Cream Yellow':'Best',Olive:'Best','Charcoal Grey':'Good','Light Grey':'Avoid'}};if(s.kind==='shirt'&&b.kind==='trouser'&&known[s.name]?.[b.name])return known[s.name][b.name];let a=s.name.toLowerCase(),z=b.name.toLowerCase(),muted=['sage','olive','taupe','dusty','slate','grey','gray'],warm=['cream','yellow','pink','taupe'],cool=['navy','blue','teal','black','grey','gray'];if(a.includes('black')||z.includes('black'))return 'Good';if((muted.some(v=>a.includes(v))&&muted.some(v=>z.includes(v)))||(a.includes('teal')&&/olive|taupe/.test(z)))return 'Best';if((cool.some(v=>a.includes(v))&&warm.some(v=>z.includes(v)))||(warm.some(v=>a.includes(v))&&cool.some(v=>z.includes(v))))return 'Best';return 'Good'}
-function paletteScore(s,b){let p=$('palette').value;if(p==='any')return 0;let n=(s.name+' '+b.name).toLowerCase(),dark=['black','navy','charcoal','slate','dark blue'],neutral=['black','grey','gray','white','navy','charcoal','taupe'],earth=['olive','sage','taupe','teal','dusty','cream'],cool=['navy','blue','teal','grey','gray','slate','sage'],warm=['cream','yellow','pink','taupe','olive'];let arr=p==='dark'?dark:p==='neutral'?neutral:p==='earthy'?earth:p==='cool'?cool:warm;let score=arr.reduce((v,k)=>v+(n.includes(k)?1:0),0);if(p==='dark'&&score===2)return 4;if(p==='neutral'&&score===2)return 4;if(p==='earthy'&&score===2)return 4;if(p==='cool'&&score===2)return 4;if(p==='warm'&&score>=1)return 3;return score?2:-1}
-function draw(){let s=chosenTop(),b=chosenBottom();if(!s||!b)return;for(let [id,item] of [['topColor',s],['bottomColor',b]]){$(id).style.background=item.hex||'#666';$(id).textContent=item.hex||'Approximate'}$('topName').textContent=s.name+' · '+s.kind;$('bottomName').textContent=b.name+' · '+b.kind;let r=rate(s,b),txt=r==='Best'?'Strong colour relationship.':r==='Good'?'Practical everyday combination.':'Consider another shade; screen colours are approximate.';$('assessment').innerHTML='<span class="pill '+r.toLowerCase()+'">'+r+'</span>'+txt+' Preference: '+$('palette').selectedOptions[0].text+'.'}
-function update(){fill('selTop',tops());fill('selBottom',bottoms());$('topCount').textContent=tops().length;$('bottomCount').textContent=bottoms().length;$('combos').textContent=tops().length*bottoms().length;let host=$('inventory');host.innerHTML='';for(let [k,label] of [['shirts','Shirts'],['trousers','Trousers'],['sweatshirts','Sweatshirts'],['cargos','Cargos']]){let box=document.createElement('div'),h=document.createElement('h2');h.textContent=label;box.append(h);data[k].forEach(it=>{let row=document.createElement('div');row.className='item';let span=document.createElement('span');span.textContent=it.name;let btn=document.createElement('button');btn.textContent='Remove';btn.onclick=()=>{if(data[k].length<=1){alert('Keep at least one item in each category.');return}data[k]=data[k].filter(x=>x.id!==it.id);save();update()};row.append(span,btn);box.append(row)});host.append(box)}draw()}
-// Week-use keys live only in memory. They are deliberately not written to localStorage.
-function weekKey(){let d=new Date(),u=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));u.setUTCDate(u.getUTCDate()+4-(u.getUTCDay()||7));let yearStart=new Date(Date.UTC(u.getUTCFullYear(),0,1));let week=Math.ceil((((u-yearStart)/86400000)+1)/7);return u.getUTCFullYear()+'-W'+week}let activeWeek=weekKey(),usedThisWeek=new Set();function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-const prefKeys=['shirt','trouser','sweatshirt','cargo'];
-const prefDefaults={Casual:{shirt:'any',trouser:'any',sweatshirt:'earthy',cargo:'earthy'},College:{shirt:'neutral',trouser:'dark',sweatshirt:'dark',cargo:'earthy'},Formal:{shirt:'neutral',trouser:'dark',sweatshirt:'any',cargo:'any'},Party:{shirt:'dark',trouser:'dark',sweatshirt:'dark',cargo:'any'},Outdoor:{shirt:'any',trouser:'earthy',sweatshirt:'earthy',cargo:'earthy'}};
-let categoryPrefs;try{categoryPrefs=JSON.parse(localStorage.getItem('wardrobeStudioCategoryPrefs'))||JSON.parse(JSON.stringify(prefDefaults))}catch(e){categoryPrefs=JSON.parse(JSON.stringify(prefDefaults))}
-function saveCategoryPrefs(){try{localStorage.setItem('wardrobeStudioCategoryPrefs',JSON.stringify(categoryPrefs))}catch(e){}}
-function loadCategoryPrefs(){let occasion=$('prefOccasion').value;if(!categoryPrefs[occasion])categoryPrefs[occasion]={shirt:'any',trouser:'any',sweatshirt:'any',cargo:'any'};for(let k of prefKeys)$('pref'+k[0].toUpperCase()+k.slice(1)).value=categoryPrefs[occasion][k]||'any'}
-function itemPrefScore(item,cat,occasion){let pref=categoryPrefs[occasion]?.[cat]||'any';if(pref==='any')return 0;let n=(item.name||'').toLowerCase();if(pref.startsWith('color:')){let target=pref.slice(6);let aliases={grey:['grey','gray','slate','charcoal'],blue:['blue','navy','teal'],navy:['navy','blue'],green:['green','olive','sage'],olive:['olive','sage','green'],beige:['beige','taupe','cream'],white:['white','cream','light grey'],black:['black'],brown:['brown','taupe'],pink:['pink','dusty pink'],red:['red','rust'],yellow:['yellow','cream'],teal:['teal'],purple:['purple']};let terms=aliases[target]||[target];return terms.some(v=>n.includes(v))?7:-4;}let groups={dark:['black','navy','charcoal','slate','dark blue'],neutral:['black','grey','gray','white','navy','charcoal','taupe'],earthy:['olive','sage','taupe','teal','dusty','cream','brown'],cool:['navy','blue','teal','grey','gray','slate','sage'],warm:['cream','yellow','pink','taupe','brown','rust'],light:['white','light grey','cream','dusty pink','sage','light taupe']};let hits=groups[pref]||[];return hits.some(v=>n.includes(v))?1.6:-0.35}
-for(let k of prefKeys){let id='pref'+k[0].toUpperCase()+k.slice(1);$(id).addEventListener('change',()=>{let o=$('prefOccasion').value;if(!categoryPrefs[o])categoryPrefs[o]={};categoryPrefs[o][k]=$(id).value;saveCategoryPrefs();$('categoryPrefNote').textContent='Saved preferences for '+o+' on this device.';generate()})}
-$('prefOccasion').addEventListener('change',()=>{loadCategoryPrefs();$('categoryPrefNote').textContent='Editing '+$('prefOccasion').value+' preferences. These do not change the overall palette setting.';generate()});
-function generate(){if(weekKey()!==activeWeek){activeWeek=weekKey();usedThisWeek=new Set()}let day=$('day').value,ts=tops().filter(x=>$('topType').value==='any'||x.kind===$('topType').value),bs=bottoms().filter(x=>$('bottomType').value==='any'||x.kind===$('bottomType').value),all=[];ts.forEach(s=>bs.forEach(b=>{let r=rate(s,b),score=r==='Best'?3:r==='Good'?2:1;score+=paletteScore(s,b);let prefOcc=$('prefOccasion').value;score+=itemPrefScore(s,s.kind,prefOcc)+itemPrefScore(b,b.kind,prefOcc);if(day==='Casual'&&s.kind==='sweatshirt')score+=1.5;if(day==='Casual'&&b.kind==='cargo')score+=.35;all.push({s,b,r,score,key:s.kind+':'+s.id+'|'+b.kind+':'+b.id})}));let n=$('count').value==='all'?all.length:Number($('count').value);let fresh=shuffle(all.filter(x=>!usedThisWeek.has(x.key))).sort((a,b)=>b.score-a.score),picked=fresh.slice(0,n);picked.forEach(x=>usedThisWeek.add(x.key));let host=$('outfits');host.innerHTML='';if(picked.length<n){let p=document.createElement('p');p.className='note';p.textContent=`Only ${picked.length} unused combinations remain this week for these filters. Reloading clears the temporary block list; no outfit history is stored.`;host.append(p)}picked.forEach((x,i)=>{let row=document.createElement('div');row.className='item';let left=document.createElement('div'),strong=document.createElement('strong'),small=document.createElement('small');strong.textContent=`${i+1}. ${x.s.name} ${x.s.kind} + ${x.b.name} ${x.b.kind}`;small.textContent=`${x.r} · ${day} · overall: ${$('palette').selectedOptions[0].text} · item preferences: ${$('prefOccasion').value}`;left.append(strong,document.createElement('br'),small);let btn=document.createElement('button');btn.textContent='View outfit';btn.onclick=()=>{$('selTop').value=x.s.kind+':'+x.s.id;$('selBottom').value=x.b.kind+':'+x.b.id;draw();$('selTop').scrollIntoView({behavior:'smooth',block:'center'})};row.append(left,btn);host.append(row)});if(!picked.length){let p=document.createElement('p');p.className='note';p.textContent='No unused combinations remain this week for these filters. Reload to clear temporary duplicate prevention.';host.append(p)}}
-$('generate').onclick=generate;$('regenerate').onclick=generate;$('selTop').onchange=draw;$('selBottom').onchange=draw;$('palette').onchange=()=>{draw();generate()};$('day').onchange=generate;$('topType').onchange=generate;$('bottomType').onchange=generate;$('count').onchange=generate;
-$('add').onclick=()=>{let name=$('newName').value.trim(),type=$('newType').value,hex=$('newHex').value.trim();if(!name){$('message').textContent='Enter an item name.';return}if(hex&&!/^#[0-9a-fA-F]{6}$/.test(hex)){$('message').textContent='Use HEX format #RRGGBB.';return}let k=type==='shirt'?'shirts':type==='trouser'?'trousers':type==='sweatshirt'?'sweatshirts':'cargos';if(data[k].some(x=>x.name.toLowerCase()===name.toLowerCase())){$('message').textContent='That item already exists in this category.';return}data[k].push({id:'x'+Date.now()+Math.random().toString(36).slice(2,5),name,hex:hex||defaults[name]||'#666666'});save();$('newName').value='';$('newHex').value='';$('message').textContent='Item added and saved in this browser.';update();generate()};$('reset').onclick=()=>{if(confirm('Reset all clothing to the starter wardrobe?')){data=fresh();save();usedThisWeek=new Set();update();generate();$('message').textContent='Starter wardrobe restored.'}};
-$('export').onclick=()=>{let a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.href=u;a.download='wardrobe-backup.json';a.click();URL.revokeObjectURL(u)};$('import').onclick=()=>$('file').click();$('file').onchange=async e=>{try{let x=JSON.parse(await e.target.files[0].text());for(let k of Object.keys(starter))if(!Array.isArray(x[k]))throw Error();data=x;save();update();generate();$('message').textContent='Backup imported.'}catch(err){$('message').textContent='Invalid wardrobe backup.'}e.target.value=''};
-loadCategoryPrefs();update();generate();
-</script></body></html>
+// ================= 1. COMPLETE WARDROBE DEFINITION =================
+const STARTER_WARDROBE = {
+  shirts: [
+    ['Navy Blue', '#1B2A4A'],
+    ['Grey', '#8E9196'],
+    ['White', '#F7F7F2'],
+    ['Dusty Pink', '#D49B9E'],
+    ['Black', '#1C1C1E'],
+    ['Sage Green', '#9CAF9E'],
+    ['Slate Grey', '#687685']
+  ],
+  trousers: [
+    ['Navy Blue', '#182540'],
+    ['Charcoal Grey', '#36393F'],
+    ['Black', '#151517'],
+    ['Cream Yellow', '#EFE4C8'],
+    ['Light Grey', '#C8CCD0'],
+    ['Olive', '#555D42']
+  ],
+  sweatshirts: [
+    ['Teal', '#317A78'],
+    ['Black', '#1C1C1E'],
+    ['Olive', '#555D42'],
+    ['Dark Blue', '#1B2A4A'],
+    ['Grey', '#8E9196']
+  ],
+  cargos: [
+    ['Olive Cargo', '#555D42'],
+    ['Black Cargo', '#151517'],
+    ['Muted Olive Cargo', '#6B7252'],
+    ['Light Taupe Cargo', '#B5A38C']
+  ]
+};
+
+function createFreshInventory() {
+  const inv = {};
+  for (let [cat, items] of Object.entries(STARTER_WARDROBE)) {
+    inv[cat] = items.map(([name, hex], i) => ({ id: cat + '_' + i, name, hex }));
+  }
+  return inv;
+}
+
+let wardrobeData;
+try {
+  wardrobeData = JSON.parse(localStorage.getItem('wardrobeStudioData')) || createFreshInventory();
+  for (let k of Object.keys(STARTER_WARDROBE)) {
+    if (!Array.isArray(wardrobeData[k])) wardrobeData[k] = createFreshInventory()[k];
+  }
+} catch (e) {
+  wardrobeData = createFreshInventory();
+}
+
+function saveWardrobe() {
+  try {
+    localStorage.setItem('wardrobeStudioData', JSON.stringify(wardrobeData));
+  } catch (e) {}
+}
+
+// ================= 2. CLOTHING-SPECIFIC COLOUR PREFERENCES =================
+const PREF_KEYS = ['shirt', 'trouser', 'sweatshirt', 'cargo'];
+const PREF_DEFAULTS = {
+  College: { shirt: 'neutral', trouser: 'dark', sweatshirt: 'dark', cargo: 'earthy' },
+  Casual:  { shirt: 'any', trouser: 'any', sweatshirt: 'earthy', cargo: 'earthy' },
+  Formal:  { shirt: 'neutral', trouser: 'dark', sweatshirt: 'any', cargo: 'any' },
+  Party:   { shirt: 'dark', trouser: 'dark', sweatshirt: 'dark', cargo: 'any' },
+  Outdoor: { shirt: 'any', trouser: 'earthy', sweatshirt: 'earthy', cargo: 'earthy' }
+};
+
+let categoryPrefs;
+try {
+  categoryPrefs = JSON.parse(localStorage.getItem('wardrobeStudioCategoryPrefs')) || JSON.parse(JSON.stringify(PREF_DEFAULTS));
+} catch (e) {
+  categoryPrefs = JSON.parse(JSON.stringify(PREF_DEFAULTS));
+}
+
+function saveCategoryPrefs() {
+  try {
+    localStorage.setItem('wardrobeStudioCategoryPrefs', JSON.stringify(categoryPrefs));
+  } catch (e) {}
+}
+
+function syncPreferenceInputs(occ) {
+  document.getElementById("genOccasionLabel").textContent = occ;
+  if (!categoryPrefs[occ]) categoryPrefs[occ] = { shirt: 'any', trouser: 'any', sweatshirt: 'any', cargo: 'any' };
+
+  for (let k of PREF_KEYS) {
+    let val = categoryPrefs[occ][k] || 'any';
+    let gEl = document.getElementById('genPref' + k[0].toUpperCase() + k.slice(1));
+    let tEl = document.getElementById('pref' + k[0].toUpperCase() + k.slice(1));
+    if (gEl) gEl.value = val;
+    if (tEl) tEl.value = val;
+  }
+}
+
+function itemPrefScore(item, cat, occasion) {
+  let pref = categoryPrefs[occasion]?.[cat] || 'any';
+  if (pref === 'any') return 0;
+  let n = (item.name || '').toLowerCase();
+  if (pref.startsWith('color:')) {
+    let target = pref.slice(6);
+    let aliases = {
+      grey: ['grey', 'gray', 'slate', 'charcoal'],
+      blue: ['blue', 'navy', 'teal'],
+      navy: ['navy', 'blue'],
+      green: ['green', 'olive', 'sage'],
+      olive: ['olive', 'sage', 'green'],
+      beige: ['beige', 'taupe', 'cream'],
+      white: ['white', 'cream', 'light grey'],
+      black: ['black'],
+      brown: ['brown', 'taupe'],
+      pink: ['pink', 'dusty pink'],
+      red: ['red', 'rust'],
+      yellow: ['yellow', 'cream'],
+      teal: ['teal'],
+      purple: ['purple']
+    };
+    let terms = aliases[target] || [target];
+    return terms.some(v => n.includes(v)) ? 7 : -4;
+  }
+  let groups = {
+    dark: ['black', 'navy', 'charcoal', 'slate', 'dark blue'],
+    neutral: ['black', 'grey', 'gray', 'white', 'navy', 'charcoal', 'taupe'],
+    earthy: ['olive', 'sage', 'taupe', 'teal', 'dusty', 'cream', 'brown'],
+    cool: ['navy', 'blue', 'teal', 'grey', 'gray', 'slate', 'sage'],
+    warm: ['cream', 'yellow', 'pink', 'taupe', 'brown', 'rust'],
+    light: ['white', 'light grey', 'cream', 'dusty pink', 'sage', 'light taupe']
+  };
+  let hits = groups[pref] || [];
+  return hits.some(v => n.includes(v)) ? 2.5 : -0.5;
+}
+
+// Setup Shared Event Listeners for both Generator and Manage Tab Preference Inputs
+function setupCategoryPrefsUI() {
+  const occSelectGenerator = document.getElementById("genOccasion");
+  const occSelectManage = document.getElementById("prefOccasion");
+
+  occSelectGenerator.onchange = () => {
+    let occ = occSelectGenerator.value;
+    occSelectManage.value = occ;
+    syncPreferenceInputs(occ);
+    generateStrictNoRepeatOutfits();
+  };
+
+  occSelectManage.onchange = () => {
+    let occ = occSelectManage.value;
+    occSelectGenerator.value = occ;
+    syncPreferenceInputs(occ);
+    document.getElementById("categoryPrefNote").textContent = `Editing ${occ} preferences.`;
+    generateStrictNoRepeatOutfits();
+  };
+
+  document.querySelectorAll(".pref-live-input, .pref-tab-input").forEach(input => {
+    input.addEventListener("change", (e) => {
+      let key = e.target.dataset.prefKey;
+      let val = e.target.value;
+      let occ = occSelectGenerator.value;
+      if (!categoryPrefs[occ]) categoryPrefs[occ] = {};
+      categoryPrefs[occ][key] = val;
+      saveCategoryPrefs();
+      syncPreferenceInputs(occ);
+      generateStrictNoRepeatOutfits();
+    });
+  });
+
+  syncPreferenceInputs(occSelectGenerator.value);
+}
+
+// ================= 3. SANZO WADA ARCHETYPE LOOKUP & RATINGS =================
+const WADA_CATALOG = {
+  "White|Navy Blue": { wada: "Shiro & Kon", harmony: "Achromatic Contrast", leather: "Dark Brown", rationale: "Clean, high-authority luminance contrast to start the week." },
+  "Dusty Pink|Olive": { wada: "Old Rose & Citrine Drab", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "One of Wada's signature pairings; muted pink warms up earthy olive." },
+  "Dusty Pink|Muted Olive Cargo": { wada: "Old Rose & Muted Moss", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "Soft muted pink balances structured military green tones." },
+  "Dusty Pink|Olive Cargo": { wada: "Old Rose & Citrine Drab", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "Signature complementary pairing with practical casual cargo styling." },
+  "Slate Grey|Charcoal Grey": { wada: "Aonezumi & Keshizumi", harmony: "Tonal Layering", leather: "Black", rationale: "Cool blue-grey against dark charcoal builds sleek monochromatic depth." },
+  "Navy Blue|Cream Yellow": { wada: "Marine Blue & Naples Yellow", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Deep navy grounds the bright warmth of cream trousers." },
+  "Sage Green|Black": { wada: "Glaucous Green & Pitch Black", harmony: "Anchored Chromatic", leather: "Black", rationale: "Pitch black sharpens the soft, herbal tone of sage green." },
+  "Sage Green|Black Cargo": { wada: "Glaucous Green & Pitch Black", harmony: "Anchored Chromatic", leather: "Black", rationale: "Structured black cargo grounds the organic herbal sage green top." },
+  "Navy Blue|Light Grey": { wada: "Prussian Blue & Pearl Grey", harmony: "Warm-Cool Balance", leather: "Black", rationale: "Flips the standard dark-trouser formula while staying crisp and formal." },
+  "Sage Green|Cream Yellow": { wada: "Celadon & Buff", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Soft, sunlit natural harmony straight out of Wada's kimono plates." },
+  "Black|Charcoal Grey": { wada: "Kuro & Dark Slate", harmony: "Achromatic Contrast", leather: "Black", rationale: "Low-contrast, structured mid-week look with subtle texture separation." },
+  "Dusty Pink|Navy Blue": { wada: "Hermosa Pink & Deep Indigo", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Deep navy provides a tailored, masculine frame for dusty pink." },
+  "Grey|Olive": { wada: "Ash Grey & Roman Green", harmony: "Anchored Chromatic", leather: "Dark Brown", rationale: "Neutral grey steps back so the olive trousers carry the visual weight." },
+  "Grey|Olive Cargo": { wada: "Ash Grey & Roman Green", harmony: "Anchored Chromatic", leather: "Dark Brown", rationale: "Clean utilitarian balance between soft ash grey and tactical olive." },
+  "Slate Grey|Navy Blue": { wada: "Iron Grey & Marine Blue", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Neighbouring cool tones that look richer and softer than black and grey." },
+  "White|Olive": { wada: "Ivory White & Olive Green", harmony: "Anchored Chromatic", leather: "Dark Brown", rationale: "Crisp white highlights the warm green-gold undertones of olive." },
+  "Dusty Pink|Charcoal Grey": { wada: "Pale Crimson & Charcoal", harmony: "Anchored Chromatic", leather: "Black", rationale: "Dark charcoal absorbs glare, making dusty pink look grounded and formal." },
+  "Grey|Black": { wada: "Neutral Grey & Pitch Black", harmony: "Achromatic Contrast", leather: "Black", rationale: "Clean, distraction-free achromatic pairing for long lab or lecture days." },
+  "Sage Green|Light Grey": { wada: "Grayish Jade & Silver Grey", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Low luminance contrast gives a light, relaxed Friday finish." },
+  "White|Charcoal Grey": { wada: "Pure White & Keshizumi", harmony: "Achromatic Contrast", leather: "Black", rationale: "Softer than stark black-and-white; ideal for formal presentations." },
+  "Navy Blue|Olive": { wada: "Deep Indigo & Citrine Drab", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Two deep, saturated natural tones that create quiet richness." },
+  "Black|Light Grey": { wada: "Pitch Black & Gin-Nezumi", harmony: "Achromatic Contrast", leather: "Black", rationale: "High-contrast monochrome with a lighter bottom half for daytime wear." },
+  "Slate Grey|Cream Yellow": { wada: "Blue-Grey & Cream", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "The cool blue undertone in slate balances the warm yellow in cream." },
+  "Dusty Pink|Black": { wada: "Old Rose & Pitch Black", harmony: "Anchored Chromatic", leather: "Black", rationale: "Wada's classic kimono contrast—black makes muted pink pop cleanly." },
+  "Dusty Pink|Black Cargo": { wada: "Old Rose & Pitch Black", harmony: "Anchored Chromatic", leather: "Black", rationale: "High-contrast combination balancing delicate pink with utility black." },
+
+  "Teal|Light Taupe Cargo": { wada: "Kuro-Midori & Sand Taupe", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "Vivid Japanese teal elevated by earthy sand taupe cargos." },
+  "Teal|Olive Trousers": { wada: "Deep Teal & Citrine Drab", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "Sanzo Wada Plate 84: lush analogous earth and jewel tones." },
+  "Teal|Olive Cargo": { wada: "Deep Teal & Citrine Drab", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "Rich forest teal contrasted against rugged olive cargo." },
+  "Teal|Muted Olive Cargo": { wada: "Teal & Muted Moss", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "Sophisticated campus pairing of saturated teal with dusty olive." },
+  "Teal|Cream Yellow": { wada: "Teal & Naples Cream", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Bold cool-warm interplay with sunny Japanese cream trousers." },
+  "Teal|Black": { wada: "Teal & Pitch Black", harmony: "Anchored Chromatic", leather: "Black", rationale: "Clean architectural look where black frames vivid teal." },
+  "Teal|Black Cargo": { wada: "Teal & Pitch Black", harmony: "Anchored Chromatic", leather: "Black", rationale: "Sharp modern street-formal balance." },
+  "Teal|Charcoal Grey": { wada: "Teal & Dark Slate", harmony: "Anchored Chromatic", leather: "Black", rationale: "Muted graphite grounds the energetic teal tone." },
+  "Olive|Black Cargo": { wada: "Deep Olive & Pitch Black", harmony: "Anchored Chromatic", leather: "Dark Brown", rationale: "Rugged organic top anchored with deep structured black." },
+  "Olive|Cream Yellow": { wada: "Roman Olive & Buff", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Warm sunlit natural harmony with soft tonal transition." },
+  "Dark Blue|Cream Yellow": { wada: "Marine Blue & Warm Cream", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Classic varsity combination grounded with navy warmth." },
+  "Dark Blue|Light Taupe Cargo": { wada: "Indigo & Sand Taupe", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Modern collegiate casual balancing rich dark blue with neutral taupe." },
+  "Dark Blue|Olive Cargo": { wada: "Deep Indigo & Citrine Cargo", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Deep natural contrast suitable for long campus days." },
+  "Navy Blue|Light Taupe Cargo": { wada: "Navy & Sand Taupe", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Crisp navy top balanced against warm light taupe trousers." },
+  "Grey|Black Cargo": { wada: "Ash Grey & Pitch Black Cargo", harmony: "Achromatic Contrast", leather: "Black", rationale: "Distraction-free athletic monochrome with tactical styling." }
+};
+
+const WADA_PALETTE = {
+  leather: {
+    "Dark Brown": "#4A2E1B",
+    "Black":      "#1A1A1A"
+  }
+};
+
+// ================= 4. UTILITY & COLOR CLASSIFICATION (PEAK / GOOD / MID) =================
+function getContrastColor(hex) {
+  if (!hex || hex.length < 6) return '#FFFFFF';
+  let h = hex.replace('#', '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  let r = parseInt(h.substring(0, 2), 16) || 0;
+  let g = parseInt(h.substring(2, 4), 16) || 0;
+  let b = parseInt(h.substring(4, 6), 16) || 0;
+  let yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 155 ? '#111215' : '#FFFFFF';
+}
+
+function getColorKey(item) {
+  let name = (item.name || '').toLowerCase();
+  if (name.includes('black')) return 'black';
+  if (name.includes('navy') || name.includes('dark blue')) return 'navy';
+  if (name.includes('white')) return 'white';
+  if (name.includes('olive')) return 'olive';
+  if (name.includes('cream') || name.includes('yellow')) return 'cream';
+  if (name.includes('pink')) return 'pink';
+  if (name.includes('sage')) return 'sage';
+  if (name.includes('teal')) return 'teal';
+  if (name.includes('taupe')) return 'taupe';
+  if (name.includes('charcoal')) return 'charcoal';
+  if (name.includes('slate')) return 'slate';
+  if (name.includes('light grey') || name.includes('light gray')) return 'light-grey';
+  if (name.includes('grey') || name.includes('gray')) return 'grey';
+  if (name.includes('blue')) return 'blue';
+  if (name.includes('green')) return 'green';
+  if (name.includes('brown')) return 'brown';
+  return name.trim();
+}
+
+function getLeatherAnchor(s, b) {
+  let combined = ((s.name || '') + ' ' + (b.name || '')).toLowerCase();
+  if (combined.includes('olive') || combined.includes('cream') || combined.includes('taupe') || combined.includes('pink') || combined.includes('sage')) {
+    return { name: 'Dark Brown', hex: '#4A2E1B' };
+  }
+  if (combined.includes('navy') && !combined.includes('black')) {
+    return { name: 'Dark Brown', hex: '#4A2E1B' };
+  }
+  return { name: 'Black', hex: '#1A1A1A' };
+}
+
+function classifySanzoWada(s, b) {
+  let sKey = getColorKey(s);
+  let bKey = getColorKey(b);
+  let lookupKey = s.name.replace(/ cargo| sweatshirt| trouser/gi, '') + '|' + b.name.replace(/ cargo| sweatshirt| trouser/gi, '');
+  let catalogMatch = WADA_CATALOG[lookupKey] || WADA_CATALOG[s.name + '|' + b.name];
+
+  if ((sKey === 'white' && bKey === 'light-grey') ||
+      (sKey === 'grey' && bKey === 'light-grey') ||
+      (sKey === 'slate' && bKey === 'light-grey') ||
+      (sKey === 'navy' && bKey === 'navy') ||
+      (sKey === 'pink' && bKey === 'taupe') ||
+      (sKey === 'olive' && bKey === 'olive') ||
+      (sKey === 'grey' && bKey === 'grey')) {
+    return {
+      tier: 'MID',
+      tierLabel: '⚖️ MID',
+      wada: catalogMatch ? catalogMatch.wada : `${s.name} & ${b.name}`,
+      harmony: 'Low Contrast / Monotone',
+      leather: getLeatherAnchor(s, b),
+      rationale: 'Subdued tonal separation. Wearable but requires distinct fabric textures or accessories to avoid looking washed out.'
+    };
+  }
+
+  const isPeak = (
+    catalogMatch ||
+    (sKey === 'pink' && ['olive', 'charcoal', 'navy', 'black'].includes(bKey)) ||
+    (sKey === 'white' && ['navy', 'charcoal', 'black', 'olive'].includes(bKey)) ||
+    (sKey === 'slate' && ['cream', 'charcoal', 'navy', 'olive', 'taupe'].includes(bKey)) ||
+    (sKey === 'sage' && ['black', 'cream', 'navy', 'light-grey', 'taupe'].includes(bKey)) ||
+    (sKey === 'navy' && ['cream', 'light-grey', 'olive', 'taupe'].includes(bKey)) ||
+    (sKey === 'black' && ['cream', 'light-grey', 'olive', 'taupe'].includes(bKey)) ||
+    (sKey === 'teal' && ['olive', 'taupe', 'cream', 'charcoal', 'black'].includes(bKey)) ||
+    (sKey === 'olive' && ['black', 'cream', 'charcoal', 'light-grey'].includes(bKey)) ||
+    (sKey === 'grey' && ['olive', 'black', 'navy'].includes(bKey))
+  );
+
+  if (isPeak) {
+    let harmony = catalogMatch ? catalogMatch.harmony : deduceHarmony(sKey, bKey);
+    let wadaName = catalogMatch ? catalogMatch.wada : deduceWadaName(s, b);
+    let rationale = catalogMatch ? catalogMatch.rationale : 'Sanzo Wada signature palette featuring intentional color temperature balance and authoritative contrast.';
+    return {
+      tier: 'PEAK',
+      tierLabel: '🔥 PEAK',
+      wada: wadaName,
+      harmony: harmony,
+      leather: catalogMatch ? { name: catalogMatch.leather, hex: WADA_PALETTE.leather[catalogMatch.leather] || '#1A1A1A' } : getLeatherAnchor(s, b),
+      rationale: rationale
+    };
+  }
+
+  return {
+    tier: 'GOOD',
+    tierLabel: '✨ GOOD',
+    wada: catalogMatch ? catalogMatch.wada : `${s.name} & ${b.name}`,
+    harmony: deduceHarmony(sKey, bKey),
+    leather: getLeatherAnchor(s, b),
+    rationale: 'Reliable, tasteful Japanese aesthetic pairing with clean visual balance for everyday academic or campus wear.'
+  };
+}
+
+function deduceHarmony(sKey, bKey) {
+  if (sKey === 'black' || bKey === 'black') {
+    if (['sage', 'olive', 'pink', 'teal'].includes(sKey) || ['sage', 'olive', 'pink', 'teal'].includes(bKey)) {
+      return 'Anchored Chromatic';
+    }
+    return 'Achromatic Contrast';
+  }
+  if ((sKey === 'pink' && bKey === 'olive') || (sKey === 'slate' && bKey === 'cream') || (sKey === 'teal' && bKey === 'olive')) {
+    return 'Complementary Contrast';
+  }
+  let cool = ['navy', 'blue', 'teal', 'slate'];
+  let warm = ['cream', 'pink', 'taupe', 'olive'];
+  if ((cool.includes(sKey) && warm.includes(bKey)) || (warm.includes(sKey) && cool.includes(bKey))) {
+    return 'Warm-Cool Balance';
+  }
+  return 'Tonal Layering';
+}
+
+function deduceWadaName(s, b) {
+  return `${s.name} & ${b.name}`;
+}
+
+// ================= 5. CURATED 4-WEEK SCHEDULE PRESETS =================
+// Preset A: Classic 7 Formal Shirts x 6 Trousers (The original college rotation)
+const CLASSIC_FORMAL_SCHEDULE = [
+  // Week 1
+  { week: 1, day: "Monday", top: { name: "White Shirt", hex: "#F7F7F2" }, bottom: { name: "Navy Blue Trousers", hex: "#182540" }, wada: "Shiro & Kon", harmony: "Achromatic Contrast", leather: "Dark Brown", rationale: "Clean, high-authority luminance contrast to start the week." },
+  { week: 1, day: "Tuesday", top: { name: "Dusty Pink Shirt", hex: "#D49B9E" }, bottom: { name: "Olive Trousers", hex: "#555D42" }, wada: "Old Rose & Citrine Drab", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "One of Wada's signature pairings; muted pink warms up earthy olive." },
+  { week: 1, day: "Wednesday", top: { name: "Slate Grey Shirt", hex: "#687685" }, bottom: { name: "Charcoal Grey Trousers", hex: "#36393F" }, wada: "Aonezumi & Keshizumi", harmony: "Tonal Layering", leather: "Black", rationale: "Cool blue-grey against dark charcoal builds sleek monochromatic depth." },
+  { week: 1, day: "Thursday", top: { name: "Navy Blue Shirt", hex: "#1B2A4A" }, bottom: { name: "Cream Yellow Trousers", hex: "#EFE4C8" }, wada: "Marine Blue & Naples Yellow", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Deep navy grounds the bright warmth of cream trousers." },
+  { week: 1, day: "Friday", top: { name: "Sage Green Shirt", hex: "#9CAF9E" }, bottom: { name: "Black Trousers", hex: "#151517" }, wada: "Glaucous Green & Pitch Black", harmony: "Anchored Chromatic", leather: "Black", rationale: "Pitch black sharpens the soft, herbal tone of sage green." },
+
+  // Week 2
+  { week: 2, day: "Monday", top: { name: "Navy Blue Shirt", hex: "#1B2A4A" }, bottom: { name: "Light Grey Trousers", hex: "#C8CCD0" }, wada: "Prussian Blue & Pearl Grey", harmony: "Warm-Cool Balance", leather: "Black", rationale: "Flips the standard dark-trouser formula while staying crisp and formal." },
+  { week: 2, day: "Tuesday", top: { name: "Sage Green Shirt", hex: "#9CAF9E" }, bottom: { name: "Cream Yellow Trousers", hex: "#EFE4C8" }, wada: "Celadon & Buff", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Soft, sunlit natural harmony straight out of Wada's kimono plates." },
+  { week: 2, day: "Wednesday", top: { name: "Black Shirt", hex: "#1C1C1E" }, bottom: { name: "Charcoal Grey Trousers", hex: "#36393F" }, wada: "Kuro & Dark Slate", harmony: "Achromatic Contrast", leather: "Black", rationale: "Low-contrast, structured mid-week look with subtle texture separation." },
+  { week: 2, day: "Thursday", top: { name: "Dusty Pink Shirt", hex: "#D49B9E" }, bottom: { name: "Navy Blue Trousers", hex: "#182540" }, wada: "Hermosa Pink & Deep Indigo", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Deep navy provides a tailored, masculine frame for dusty pink." },
+  { week: 2, day: "Friday", top: { name: "Grey Shirt", hex: "#8E9196" }, bottom: { name: "Olive Trousers", hex: "#555D42" }, wada: "Ash Grey & Roman Green", harmony: "Anchored Chromatic", leather: "Dark Brown", rationale: "Neutral grey steps back so the olive trousers carry the visual weight." },
+
+  // Week 3
+  { week: 3, day: "Monday", top: { name: "Slate Grey Shirt", hex: "#687685" }, bottom: { name: "Navy Blue Trousers", hex: "#182540" }, wada: "Iron Grey & Marine Blue", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Neighbouring cool tones that look richer and softer than black and grey." },
+  { week: 3, day: "Tuesday", top: { name: "White Shirt", hex: "#F7F7F2" }, bottom: { name: "Olive Trousers", hex: "#555D42" }, wada: "Ivory White & Olive Green", harmony: "Anchored Chromatic", leather: "Dark Brown", rationale: "Crisp white highlights the warm green-gold undertones of olive." },
+  { week: 3, day: "Wednesday", top: { name: "Dusty Pink Shirt", hex: "#D49B9E" }, bottom: { name: "Charcoal Grey Trousers", hex: "#36393F" }, wada: "Pale Crimson & Charcoal", harmony: "Anchored Chromatic", leather: "Black", rationale: "Dark charcoal absorbs glare, making dusty pink look grounded and formal." },
+  { week: 3, day: "Thursday", top: { name: "Grey Shirt", hex: "#8E9196" }, bottom: { name: "Black Trousers", hex: "#151517" }, wada: "Neutral Grey & Pitch Black", harmony: "Achromatic Contrast", leather: "Black", rationale: "Clean, distraction-free achromatic pairing for long lab or lecture days." },
+  { week: 3, day: "Friday", top: { name: "Sage Green Shirt", hex: "#9CAF9E" }, bottom: { name: "Light Grey Trousers", hex: "#C8CCD0" }, wada: "Grayish Jade & Silver Grey", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Low luminance contrast gives a light, relaxed Friday finish." },
+
+  // Week 4
+  { week: 4, day: "Monday", top: { name: "White Shirt", hex: "#F7F7F2" }, bottom: { name: "Charcoal Grey Trousers", hex: "#36393F" }, wada: "Pure White & Keshizumi", harmony: "Achromatic Contrast", leather: "Black", rationale: "Softer than stark black-and-white; ideal for formal presentations." },
+  { week: 4, day: "Tuesday", top: { name: "Navy Blue Shirt", hex: "#1B2A4A" }, bottom: { name: "Olive Trousers", hex: "#555D42" }, wada: "Deep Indigo & Citrine Drab", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Two deep, saturated natural tones that create quiet richness." },
+  { week: 4, day: "Wednesday", top: { name: "Black Shirt", hex: "#1C1C1E" }, bottom: { name: "Light Grey Trousers", hex: "#C8CCD0" }, wada: "Pitch Black & Gin-Nezumi", harmony: "Achromatic Contrast", leather: "Black", rationale: "High-contrast monochrome with a lighter bottom half for daytime wear." },
+  { week: 4, day: "Thursday", top: { name: "Slate Grey Shirt", hex: "#687685" }, bottom: { name: "Cream Yellow Trousers", hex: "#EFE4C8" }, wada: "Blue-Grey & Cream", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "The cool blue undertone in slate balances the warm yellow in cream." },
+  { week: 4, day: "Friday", top: { name: "Dusty Pink Shirt", hex: "#D49B9E" }, bottom: { name: "Black Trousers", hex: "#151517" }, wada: "Old Rose & Pitch Black", harmony: "Anchored Chromatic", leather: "Black", rationale: "Wada's classic kimono contrast—black makes muted pink pop cleanly." }
+];
+
+// Preset B: Complete All-Clothes Mix (All 22 Garments: Shirts + Sweatshirts, Trousers + Cargos)
+const COMPLETE_ALL_CLOTHES_SCHEDULE = [
+  // Week 1
+  { week: 1, day: "Monday", top: { name: "White Shirt", hex: "#F7F7F2" }, bottom: { name: "Navy Blue Trousers", hex: "#182540" }, wada: "Shiro & Kon", harmony: "Achromatic Contrast", leather: "Dark Brown", rationale: "Clean, high-authority luminance contrast to start the week." },
+  { week: 1, day: "Tuesday", top: { name: "Dusty Pink Shirt", hex: "#D49B9E" }, bottom: { name: "Olive Trousers", hex: "#555D42" }, wada: "Old Rose & Citrine Drab", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "One of Wada's signature pairings; muted pink warms up earthy olive." },
+  { week: 1, day: "Wednesday", top: { name: "Slate Grey Shirt", hex: "#687685" }, bottom: { name: "Charcoal Grey Trousers", hex: "#36393F" }, wada: "Aonezumi & Keshizumi", harmony: "Tonal Layering", leather: "Black", rationale: "Cool blue-grey against dark charcoal builds sleek monochromatic depth." },
+  { week: 1, day: "Thursday", top: { name: "Teal Sweatshirt", hex: "#317A78" }, bottom: { name: "Light Taupe Cargo", hex: "#B5A38C" }, wada: "Kuro-Midori & Sand Taupe", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "Vivid Japanese teal elevated by earthy sand taupe cargos." },
+  { week: 1, day: "Friday", top: { name: "Black Shirt", hex: "#1C1C1E" }, bottom: { name: "Cream Yellow Trousers", hex: "#EFE4C8" }, wada: "Pitch Black & Naples Yellow", harmony: "Achromatic Contrast", leather: "Black", rationale: "High-contrast monochrome with bright cream warmth to finish the week." },
+
+  // Week 2
+  { week: 2, day: "Monday", top: { name: "Navy Blue Shirt", hex: "#1B2A4A" }, bottom: { name: "Light Grey Trousers", hex: "#C8CCD0" }, wada: "Prussian Blue & Pearl Grey", harmony: "Warm-Cool Balance", leather: "Black", rationale: "Flips the standard dark-trouser formula while staying crisp and formal." },
+  { week: 2, day: "Tuesday", top: { name: "Sage Green Shirt", hex: "#9CAF9E" }, bottom: { name: "Cream Yellow Trousers", hex: "#EFE4C8" }, wada: "Celadon & Buff", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Soft, sunlit natural harmony straight out of Wada's kimono plates." },
+  { week: 2, day: "Wednesday", top: { name: "Olive Sweatshirt", hex: "#555D42" }, bottom: { name: "Black Cargo", hex: "#151517" }, wada: "Deep Olive & Pitch Black", harmony: "Anchored Chromatic", leather: "Dark Brown", rationale: "Rugged organic top anchored with deep structured black cargos." },
+  { week: 2, day: "Thursday", top: { name: "Grey Shirt", hex: "#8E9196" }, bottom: { name: "Olive Cargo", hex: "#555D42" }, wada: "Ash Grey & Roman Green", harmony: "Anchored Chromatic", leather: "Dark Brown", rationale: "Neutral grey steps back so the olive cargo carries the visual weight." },
+  { week: 2, day: "Friday", top: { name: "Black Sweatshirt", hex: "#1C1C1E" }, bottom: { name: "Charcoal Grey Trousers", hex: "#36393F" }, wada: "Kuro & Dark Slate", harmony: "Achromatic Contrast", leather: "Black", rationale: "Low-contrast, structured Friday look with subtle texture separation." },
+
+  // Week 3
+  { week: 3, day: "Monday", top: { name: "Dark Blue Sweatshirt", hex: "#1B2A4A" }, bottom: { name: "Cream Yellow Trousers", hex: "#EFE4C8" }, wada: "Marine Blue & Warm Cream", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Deep navy athletic top grounds the bright warmth of cream trousers." },
+  { week: 3, day: "Tuesday", top: { name: "White Shirt", hex: "#F7F7F2" }, bottom: { name: "Olive Trousers", hex: "#555D42" }, wada: "Ivory White & Olive Green", harmony: "Anchored Chromatic", leather: "Dark Brown", rationale: "Crisp white highlights the warm green-gold undertones of olive." },
+  { week: 3, day: "Wednesday", top: { name: "Dusty Pink Shirt", hex: "#D49B9E" }, bottom: { name: "Charcoal Grey Trousers", hex: "#36393F" }, wada: "Pale Crimson & Charcoal", harmony: "Anchored Chromatic", leather: "Black", rationale: "Dark charcoal absorbs glare, making dusty pink look grounded and formal." },
+  { week: 3, day: "Thursday", top: { name: "Slate Grey Shirt", hex: "#687685" }, bottom: { name: "Navy Blue Trousers", hex: "#182540" }, wada: "Iron Grey & Marine Blue", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Neighbouring cool tones that look richer and softer than black and grey." },
+  { week: 3, day: "Friday", top: { name: "Grey Sweatshirt", hex: "#8E9196" }, bottom: { name: "Black Trousers", hex: "#151517" }, wada: "Neutral Grey & Pitch Black", harmony: "Achromatic Contrast", leather: "Black", rationale: "Clean, distraction-free achromatic pairing for long lab or lecture days." },
+
+  // Week 4
+  { week: 4, day: "Monday", top: { name: "White Shirt", hex: "#F7F7F2" }, bottom: { name: "Charcoal Grey Trousers", hex: "#36393F" }, wada: "Pure White & Keshizumi", harmony: "Achromatic Contrast", leather: "Black", rationale: "Softer than stark black-and-white; ideal for formal presentations." },
+  { week: 4, day: "Tuesday", top: { name: "Teal Sweatshirt", hex: "#317A78" }, bottom: { name: "Muted Olive Cargo", hex: "#6B7252" }, wada: "Teal & Muted Moss", harmony: "Complementary Contrast", leather: "Dark Brown", rationale: "Sophisticated campus pairing of saturated teal with dusty olive cargos." },
+  { week: 4, day: "Wednesday", top: { name: "Navy Blue Shirt", hex: "#1B2A4A" }, bottom: { name: "Light Taupe Cargo", hex: "#B5A38C" }, wada: "Navy & Sand Taupe", harmony: "Warm-Cool Balance", leather: "Dark Brown", rationale: "Tailored navy shirt balanced against relaxed sand taupe bottoms." },
+  { week: 4, day: "Thursday", top: { name: "Sage Green Shirt", hex: "#9CAF9E" }, bottom: { name: "Light Grey Trousers", hex: "#C8CCD0" }, wada: "Grayish Jade & Silver Grey", harmony: "Tonal Layering", leather: "Dark Brown", rationale: "Low luminance contrast gives a light, relaxed Thursday finish." },
+  { week: 4, day: "Friday", top: { name: "Dusty Pink Shirt", hex: "#D49B9E" }, bottom: { name: "Black Cargo", hex: "#151517" }, wada: "Old Rose & Pitch Black", harmony: "Anchored Chromatic", leather: "Black", rationale: "Wada's classic kimono contrast—black cargo makes muted pink pop cleanly." }
+];
+
+const RESTING_NOTES_CLASSIC = {
+  1: "Resting in Week 1: Grey Shirt, Black Shirt, Light Grey Trousers",
+  2: "Resting in Week 2: White Shirt, Slate Grey Shirt, Black Trousers",
+  3: "Resting in Week 3: Navy Blue Shirt, Black Shirt, Cream Yellow Trousers",
+  4: "Resting in Week 4: Sage Green Shirt, Grey Shirt, Navy Blue Trousers"
+};
+
+const RESTING_NOTES_ALL = {
+  1: "Resting in Week 1: Grey Shirt, Sage Green Shirt, Olive Sweatshirt, Black Cargo",
+  2: "Resting in Week 2: White Shirt, Slate Grey Shirt, Teal Sweatshirt, Black Trousers",
+  3: "Resting in Week 3: Navy Blue Shirt, Black Shirt, Light Taupe Cargo, Cream Yellow Trousers",
+  4: "Resting in Week 4: Slate Grey Shirt, Grey Shirt, Dark Blue Sweatshirt, Navy Blue Trousers"
+};
+
+const THEMES_CLASSIC = {
+  1: "Authority & High Contrast (Kimono Monochrome)",
+  2: "Inverted Tone & Soft Natural Harmony",
+  3: "Subdued Cool Depth & Grounded Chromatics",
+  4: "Presentation Polish & Kimono Classics"
+};
+
+const THEMES_ALL = {
+  1: "Authority & Earthy Contrast (Academic Start)",
+  2: "Inverted Tones & Soft Natural Harmonies",
+  3: "Athletic Depth & Rich Kimono Palettes",
+  4: "Campus Presentation & Texture Mastery"
+};
+
+// ================= 6. VIEW 1: MATRIX RENDERING =================
+let matrixFilterState = {
+  topType: "all",
+  bottomType: "all",
+  week: "all",
+  harmony: "all",
+  garment: "all"
+};
+
+function getActiveMatrixSchedule() {
+  const tType = matrixFilterState.topType;
+  const bType = matrixFilterState.bottomType;
+
+  // Mode 1: Classic Shirts Only & Trousers Only
+  if (tType === 'shirt' && bType === 'trouser') {
+    return {
+      schedule: CLASSIC_FORMAL_SCHEDULE,
+      resting: RESTING_NOTES_CLASSIC,
+      themes: THEMES_CLASSIC,
+      label: "Classic Formal (7 Shirts × 6 Trousers)",
+      topsCount: 7,
+      bottomsCount: 6
+    };
+  }
+
+  // Mode 2: Complete Mix (All Clothes)
+  if (tType === 'all' && bType === 'all') {
+    return {
+      schedule: COMPLETE_ALL_CLOTHES_SCHEDULE,
+      resting: RESTING_NOTES_ALL,
+      themes: THEMES_ALL,
+      label: "All Clothes Mix (22 Items)",
+      topsCount: 12,
+      bottomsCount: 10
+    };
+  }
+
+  // Mode 3: Dynamically filtered based on user's selection
+  let baseTops = [];
+  if (tType === 'all' || tType === 'shirt') baseTops = baseTops.concat(wardrobeData.shirts);
+  if (tType === 'all' || tType === 'sweatshirt') baseTops = baseTops.concat(wardrobeData.sweatshirts);
+
+  let baseBottoms = [];
+  if (bType === 'all' || bType === 'trouser') baseBottoms = baseBottoms.concat(wardrobeData.trousers);
+  if (bType === 'all' || bType === 'cargo') baseBottoms = baseBottoms.concat(wardrobeData.cargos);
+
+  // Filter pairs from COMPLETE_ALL_CLOTHES_SCHEDULE that fit the criteria
+  let filteredSchedule = COMPLETE_ALL_CLOTHES_SCHEDULE.filter(item => {
+    let topMatch = (tType === 'all') ||
+      (tType === 'shirt' && wardrobeData.shirts.some(s => s.name.toLowerCase() === item.top.name.toLowerCase().replace(' shirt', ''))) ||
+      (tType === 'sweatshirt' && wardrobeData.sweatshirts.some(s => s.name.toLowerCase() === item.top.name.toLowerCase().replace(' sweatshirt', '')));
+
+    let bottomMatch = (bType === 'all') ||
+      (bType === 'trouser' && wardrobeData.trousers.some(b => b.name.toLowerCase() === item.bottom.name.toLowerCase().replace(' trousers', ''))) ||
+      (bType === 'cargo' && wardrobeData.cargos.some(b => b.name.toLowerCase() === item.bottom.name.toLowerCase().replace(' cargo', '')));
+
+    return topMatch && bottomMatch;
+  });
+
+  return {
+    schedule: filteredSchedule.length ? filteredSchedule : CLASSIC_FORMAL_SCHEDULE,
+    resting: RESTING_NOTES_ALL,
+    themes: THEMES_ALL,
+    label: `${tType.toUpperCase()} + ${bType.toUpperCase()} Rotation`,
+    topsCount: baseTops.length,
+    bottomsCount: baseBottoms.length
+  };
+}
+
+function initMatrixGarmentsDropdown() {
+  const select = document.getElementById("matrixGarmentFilter");
+  select.innerHTML = '<option value="all">All Garments in Active Scope</option>';
+
+  const groups = [
+    { label: "Shirts", cat: "shirts" },
+    { label: "Sweatshirts", cat: "sweatshirts" },
+    { label: "Trousers", cat: "trousers" },
+    { label: "Cargos", cat: "cargos" }
+  ];
+
+  groups.forEach(g => {
+    let optG = document.createElement("optgroup");
+    optG.label = g.label;
+    wardrobeData[g.cat].forEach(item => {
+      let opt = document.createElement("option");
+      opt.value = item.name.toLowerCase();
+      opt.textContent = `${g.label.slice(0, -1)}: ${item.name}`;
+      optG.appendChild(opt);
+    });
+    select.appendChild(optG);
+  });
+}
+
+function renderMatrix() {
+  const activeData = getActiveMatrixSchedule();
+  document.getElementById("matrixModeLabel").textContent = activeData.label;
+  document.getElementById("matrixTopCountBadge").textContent = `${activeData.topsCount} Items`;
+  document.getElementById("matrixBottomCountBadge").textContent = `${activeData.bottomsCount} Items`;
+
+  const filtered = activeData.schedule.filter(item => {
+    const matchWeek = matrixFilterState.week === "all" || item.week === Number(matrixFilterState.week);
+    const matchHarmony = matrixFilterState.harmony === "all" || item.harmony === matrixFilterState.harmony;
+    let matchGarment = true;
+    if (matrixFilterState.garment !== "all") {
+      let q = matrixFilterState.garment;
+      matchGarment = (item.top.name.toLowerCase().includes(q) || item.bottom.name.toLowerCase().includes(q));
+    }
+    return matchWeek && matchHarmony && matchGarment;
+  });
+
+  document.getElementById("matrixShownCount").textContent = `${filtered.length} / ${activeData.schedule.length}`;
+
+  const sectionsContainer = document.getElementById("matrixWeekSectionsContainer");
+  sectionsContainer.innerHTML = "";
+
+  const weeksToDisplay = (matrixFilterState.week === "all") ? [1, 2, 3, 4] : [Number(matrixFilterState.week)];
+  let totalRendered = 0;
+
+  weeksToDisplay.forEach(weekNum => {
+    const weekItems = filtered.filter(item => item.week === weekNum);
+    if (!weekItems.length && matrixFilterState.week !== "all") {
+      sectionsContainer.innerHTML = `<div class="empty-state">No outfits match the active filters for Week ${weekNum}.</div>`;
+      return;
+    }
+    if (!weekItems.length) return;
+
+    totalRendered += weekItems.length;
+    const themeTitle = activeData.themes[weekNum] || `Week ${weekNum} Rotation`;
+    const restingText = activeData.resting[weekNum] || "All garments active";
+
+    const weekBlock = document.createElement("section");
+    weekBlock.className = "week-group-block";
+
+    weekBlock.innerHTML = `
+      <div class="week-group-header">
+        <div class="week-title-wrap">
+          <span class="week-badge-pill">Week ${weekNum}</span>
+          <span class="week-theme-title">${themeTitle}</span>
+        </div>
+        <div class="week-resting-banner">${restingText}</div>
+      </div>
+      <div class="week-cards-list" id="weekList_${weekNum}"></div>
+    `;
+
+    const listContainer = weekBlock.querySelector(`#weekList_${weekNum}`);
+
+    weekItems.forEach(item => {
+      const sText = getContrastColor(item.top.hex);
+      const tText = getContrastColor(item.bottom.hex);
+      const lHex = WADA_PALETTE.leather[item.leather] || "#1A1A1A";
+
+      const card = document.createElement("article");
+      card.className = "outfit-card";
+      card.innerHTML = `
+        <div class="card-top-bar">
+          <span class="card-day-title">W${item.week} • ${item.day}</span>
+          <span class="card-leather-tag">
+            <span class="leather-dot" style="background:${lHex};"></span>
+            ${item.leather}
+          </span>
+        </div>
+        <div class="swatch-split-block">
+          <div class="swatch-top-half" style="background:${item.top.hex};color:${sText};">
+            <span>S: ${item.top.name}</span>
+            <span class="swatch-hex-subtle">${item.top.hex}</span>
+          </div>
+          <div class="swatch-bottom-half" style="background:${item.bottom.hex};color:${tText};">
+            <span>T: ${item.bottom.name}</span>
+            <span class="swatch-hex-subtle">${item.bottom.hex}</span>
+          </div>
+        </div>
+        <div class="card-wada-title">${item.wada}</div>
+        <div class="card-badges-row">
+          <span class="harmony-badge">${item.harmony}</span>
+          <span class="tier-badge peak">🔥 PEAK</span>
+        </div>
+      `;
+
+      card.addEventListener("click", () => {
+        openModalInspector({
+          shirt: item.top.name,
+          shirtHex: item.top.hex,
+          trouser: item.bottom.name,
+          trouserHex: item.bottom.hex,
+          wada: item.wada,
+          harmony: item.harmony,
+          tier: "PEAK",
+          leather: item.leather,
+          leatherHex: lHex,
+          rationale: item.rationale,
+          meta: `Week ${item.week} • ${item.day} • ${activeData.label}`
+        });
+      });
+
+      listContainer.appendChild(card);
+    });
+
+    sectionsContainer.appendChild(weekBlock);
+  });
+
+  if (totalRendered === 0) {
+    sectionsContainer.innerHTML = `<div class="empty-state">No outfits match the active filters.</div>`;
+  }
+
+  renderMatrixStats(filtered);
+}
+
+function renderMatrixStats(filtered) {
+  const shirtBox = document.getElementById("shirtStatBars");
+  const trouserBox = document.getElementById("trouserStatBars");
+  shirtBox.innerHTML = "";
+  trouserBox.innerHTML = "";
+
+  const allTops = [...wardrobeData.shirts, ...wardrobeData.sweatshirts];
+  allTops.forEach(item => {
+    const count = filtered.filter(o => o.top.name.toLowerCase().includes(item.name.toLowerCase())).length;
+    if (count > 0 || matrixFilterState.topType === 'all') {
+      const pct = Math.min(100, (count / 3) * 100);
+      shirtBox.innerHTML += `
+        <div class="stat-row">
+          <span class="inv-dot" style="background:${item.hex};margin-right:2px;"></span>
+          <span class="stat-name">${item.name}</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%;"></div></div>
+          <span class="stat-count-num">${count}×</span>
+        </div>
+      `;
+    }
+  });
+
+  const allBottoms = [...wardrobeData.trousers, ...wardrobeData.cargos];
+  allBottoms.forEach(item => {
+    const count = filtered.filter(o => o.bottom.name.toLowerCase().includes(item.name.toLowerCase())).length;
+    if (count > 0 || matrixFilterState.bottomType === 'all') {
+      const pct = Math.min(100, (count / 3) * 100);
+      trouserBox.innerHTML += `
+        <div class="stat-row">
+          <span class="inv-dot" style="background:${item.hex};margin-right:2px;"></span>
+          <span class="stat-name">${item.name}</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%;"></div></div>
+          <span class="stat-count-num">${count}×</span>
+        </div>
+      `;
+    }
+  });
+}
+
+// ================= 7. VIEW 2: ALL COMBINATIONS DIRECTORY =================
+let dirFilterState = {
+  tier: "all",
+  topType: "all",
+  bottomType: "all"
+};
+
+function getAllPossiblePairs() {
+  let tops = [];
+  if (dirFilterState.topType === "all" || dirFilterState.topType === "shirt") {
+    tops = tops.concat(wardrobeData.shirts.map(x => ({ ...x, kind: 'shirt' })));
+  }
+  if (dirFilterState.topType === "all" || dirFilterState.topType === "sweatshirt") {
+    tops = tops.concat(wardrobeData.sweatshirts.map(x => ({ ...x, kind: 'sweatshirt' })));
+  }
+
+  let bottoms = [];
+  if (dirFilterState.bottomType === "all" || dirFilterState.bottomType === "trouser") {
+    bottoms = bottoms.concat(wardrobeData.trousers.map(x => ({ ...x, kind: 'trouser' })));
+  }
+  if (dirFilterState.bottomType === "all" || dirFilterState.bottomType === "cargo") {
+    bottoms = bottoms.concat(wardrobeData.cargos.map(x => ({ ...x, kind: 'cargo' })));
+  }
+
+  const allPairs = [];
+  tops.forEach(s => {
+    bottoms.forEach(b => {
+      const evaluation = classifySanzoWada(s, b);
+      allPairs.push({
+        s,
+        b,
+        ...evaluation
+      });
+    });
+  });
+
+  return allPairs;
+}
+
+function renderDirectory() {
+  const allCombinations = getAllPossiblePairs();
+
+  const peakCount = allCombinations.filter(c => c.tier === 'PEAK').length;
+  const goodCount = allCombinations.filter(c => c.tier === 'GOOD').length;
+  const midCount = allCombinations.filter(c => c.tier === 'MID').length;
+
+  document.getElementById("countTierAll").textContent = allCombinations.length;
+  document.getElementById("countTierPeak").textContent = peakCount;
+  document.getElementById("countTierGood").textContent = goodCount;
+  document.getElementById("countTierMid").textContent = midCount;
+  document.getElementById("dirTotalCountBadge").textContent = `${allCombinations.length} Combinations`;
+
+  const filtered = allCombinations.filter(item => {
+    return (dirFilterState.tier === "all" || item.tier === dirFilterState.tier);
+  });
+
+  const list = document.getElementById("directoryCombinationsList");
+  list.innerHTML = "";
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state">No combinations found under this category filter.</div>`;
+    return;
+  }
+
+  filtered.forEach(item => {
+    const sText = getContrastColor(item.s.hex);
+    const tText = getContrastColor(item.b.hex);
+
+    const card = document.createElement("article");
+    card.className = "outfit-card";
+    card.innerHTML = `
+      <div class="card-top-bar">
+        <span class="tier-badge ${item.tier.toLowerCase()}">${item.tierLabel}</span>
+        <span class="card-leather-tag">
+          <span class="leather-dot" style="background:${item.leather.hex};"></span>
+          ${item.leather.name}
+        </span>
+      </div>
+      <div class="swatch-split-block">
+        <div class="swatch-top-half" style="background:${item.s.hex};color:${sText};">
+          <span>S: ${item.s.name}</span>
+          <span class="swatch-hex-subtle">${item.s.hex}</span>
+        </div>
+        <div class="swatch-bottom-half" style="background:${item.b.hex};color:${tText};">
+          <span>T: ${item.b.name}</span>
+          <span class="swatch-hex-subtle">${item.b.hex}</span>
+        </div>
+      </div>
+      <div class="card-wada-title">${item.wada}</div>
+      <div class="card-badges-row">
+        <span class="harmony-badge">${item.harmony}</span>
+        <span style="font-size:0.72rem;color:var(--muted);">${item.s.kind} + ${item.b.kind}</span>
+      </div>
+    `;
+
+    card.addEventListener("click", () => {
+      openModalInspector({
+        shirt: item.s.name + (item.s.kind === 'sweatshirt' ? ' · Sweatshirt' : ''),
+        shirtHex: item.s.hex,
+        trouser: item.b.name + (item.b.kind === 'cargo' ? ' · Cargo' : ''),
+        trouserHex: item.b.hex,
+        wada: item.wada,
+        harmony: item.harmony,
+        tier: item.tier,
+        leather: item.leather.name,
+        leatherHex: item.leather.hex,
+        rationale: item.rationale,
+        meta: `Category: ${item.tier} Tier • Sanzo Wada Evaluated`
+      });
+    });
+
+    list.appendChild(card);
+  });
+}
+
+// ================= 8. VIEW 3: STRICT NO-REPEAT GENERATOR =================
+const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+function generateStrictNoRepeatOutfits() {
+  const daysVal = document.getElementById("genDaysCount").value;
+  const occasion = document.getElementById("genOccasion").value;
+  const tierFilter = document.getElementById("genTierFilter").value;
+  const topType = document.getElementById("genTopType").value;
+  const bottomType = document.getElementById("genBottomType").value;
+  const palette = document.getElementById("genPalette").value;
+
+  let tops = [];
+  if (topType === 'any' || topType === 'shirt') tops = tops.concat(wardrobeData.shirts.map(x => ({ ...x, kind: 'shirt' })));
+  if (topType === 'any' || topType === 'sweatshirt') tops = tops.concat(wardrobeData.sweatshirts.map(x => ({ ...x, kind: 'sweatshirt' })));
+
+  let bottoms = [];
+  if (bottomType === 'any' || bottomType === 'trouser') bottoms = bottoms.concat(wardrobeData.trousers.map(x => ({ ...x, kind: 'trouser' })));
+  if (bottomType === 'any' || bottomType === 'cargo') bottoms = bottoms.concat(wardrobeData.cargos.map(x => ({ ...x, kind: 'cargo' })));
+
+  let candidates = [];
+  tops.forEach(s => {
+    bottoms.forEach(b => {
+      const evalData = classifySanzoWada(s, b);
+
+      if (tierFilter === 'peak' && evalData.tier !== 'PEAK') return;
+      if (tierFilter === 'peak_good' && evalData.tier === 'MID') return;
+
+      let score = (evalData.tier === 'PEAK' ? 5 : evalData.tier === 'GOOD' ? 3 : 1);
+
+      // Add Category & Occasion Color Preferences directly from active state
+      score += itemPrefScore(s, s.kind, occasion) + itemPrefScore(b, b.kind, occasion);
+
+      // Add Palette Direction Bonus
+      if (palette !== 'any') {
+        let n = (s.name + ' ' + b.name).toLowerCase();
+        let groups = {
+          dark: ['black', 'navy', 'charcoal', 'slate', 'dark blue'],
+          neutral: ['black', 'grey', 'gray', 'white', 'navy', 'charcoal', 'taupe'],
+          earthy: ['olive', 'sage', 'taupe', 'teal', 'dusty', 'cream'],
+          cool: ['navy', 'blue', 'teal', 'grey', 'gray', 'slate', 'sage'],
+          warm: ['cream', 'yellow', 'pink', 'taupe', 'olive']
+        };
+        let arr = groups[palette] || [];
+        if (arr.some(k => n.includes(k))) score += 2;
+      }
+
+      candidates.push({
+        s,
+        b,
+        sColor: getColorKey(s),
+        bColor: getColorKey(b),
+        ...evalData,
+        score: score + (Math.random() * 0.4)
+      });
+    });
+  });
+
+  candidates.sort((a, b) => b.score - a.score);
+
+  const uniqueTopColors = new Set(tops.map(getColorKey));
+  const uniqueBottomColors = new Set(bottoms.map(getColorKey));
+  const maxPossibleUniqueDays = Math.min(uniqueTopColors.size, uniqueBottomColors.size);
+
+  let targetCount = (daysVal === 'all') ? maxPossibleUniqueDays : Number(daysVal);
+  let n = Math.min(targetCount, maxPossibleUniqueDays);
+
+  let chosen = [];
+  let usedTopColors = new Set();
+  let usedBottomColors = new Set();
+
+  for (let pair of candidates) {
+    if (!usedTopColors.has(pair.sColor) && !usedBottomColors.has(pair.bColor)) {
+      usedTopColors.add(pair.sColor);
+      usedBottomColors.add(pair.bColor);
+      chosen.push(pair);
+      if (chosen.length === n) break;
+    }
+  }
+
+  const notice = document.getElementById("genNoticeText");
+  if (chosen.length < targetCount) {
+    notice.textContent = `⚠️ Generated ${chosen.length} non-repeating combinations based on active color rules. Zero duplicate colors this week!`;
+  } else {
+    notice.textContent = `✓ Generated ${chosen.length} daily outfits for ${occasion}. Every day has a completely distinct top colour and distinct bottom colour.`;
+  }
+
+  renderGeneratedCards(chosen);
+}
+
+function renderGeneratedCards(picked) {
+  const container = document.getElementById("generatedOutfitsList");
+  container.innerHTML = "";
+
+  if (!picked.length) {
+    container.innerHTML = `<div class="empty-state">No valid combinations found under the selected filters. Try broadening the tier or category filters.</div>`;
+    return;
+  }
+
+  picked.forEach((item, index) => {
+    const dayName = DAYS_OF_WEEK[index % DAYS_OF_WEEK.length];
+    const sText = getContrastColor(item.s.hex);
+    const tText = getContrastColor(item.b.hex);
+
+    const card = document.createElement("article");
+    card.className = "outfit-card";
+    card.innerHTML = `
+      <div class="card-top-bar">
+        <span class="card-day-title">Day ${index + 1} • ${dayName}</span>
+        <span class="card-leather-tag">
+          <span class="leather-dot" style="background:${item.leather.hex};"></span>
+          ${item.leather.name}
+        </span>
+      </div>
+      <div class="swatch-split-block">
+        <div class="swatch-top-half" style="background:${item.s.hex};color:${sText};">
+          <span>S: ${item.s.name}</span>
+          <span class="swatch-hex-subtle">${item.s.hex}</span>
+        </div>
+        <div class="swatch-bottom-half" style="background:${item.b.hex};color:${tText};">
+          <span>T: ${item.b.name}</span>
+          <span class="swatch-hex-subtle">${item.b.hex}</span>
+        </div>
+      </div>
+      <div class="card-wada-title">${item.wada}</div>
+      <div class="card-badges-row">
+        <span class="harmony-badge">${item.harmony}</span>
+        <span class="tier-badge ${item.tier.toLowerCase()}">${item.tierLabel}</span>
+      </div>
+    `;
+
+    card.addEventListener("click", () => {
+      openModalInspector({
+        shirt: item.s.name,
+        shirtHex: item.s.hex,
+        trouser: item.b.name,
+        trouserHex: item.b.hex,
+        wada: item.wada,
+        harmony: item.harmony,
+        tier: item.tier,
+        leather: item.leather.name,
+        leatherHex: item.leather.hex,
+        rationale: item.rationale,
+        meta: `Day ${index + 1} • ${dayName} • ${item.tier} Tier Selection`
+      });
+    });
+
+    container.appendChild(card);
+  });
+}
+
+// ================= 9. VIEW 4: WARDROBE INVENTORY MANAGEMENT =================
+function renderInventoryUI() {
+  const container = document.getElementById("inventoryCategoryDisplay");
+  container.innerHTML = "";
+
+  const labels = {
+    shirts: "Shirts",
+    sweatshirts: "Sweatshirts",
+    trousers: "Trousers",
+    cargos: "Cargos"
+  };
+
+  for (let [catKey, catLabel] of Object.entries(labels)) {
+    const box = document.createElement("div");
+    box.className = "inventory-category-box";
+
+    const h3 = document.createElement("h3");
+    h3.textContent = `${catLabel} (${wardrobeData[catKey].length})`;
+    box.appendChild(h3);
+
+    const list = document.createElement("div");
+    list.className = "inventory-items-list";
+
+    wardrobeData[catKey].forEach(item => {
+      const row = document.createElement("div");
+      row.className = "inv-item-row";
+      row.innerHTML = `
+        <div>
+          <span class="inv-dot" style="background:${item.hex};"></span>
+          <strong>${item.name}</strong>
+        </div>
+        <button class="inv-remove-btn" title="Remove item">✕</button>
+      `;
+
+      row.querySelector(".inv-remove-btn").onclick = () => {
+        if (wardrobeData[catKey].length <= 1) {
+          alert(`You must keep at least one item in ${catLabel}.`);
+          return;
+        }
+        wardrobeData[catKey] = wardrobeData[catKey].filter(x => x.id !== item.id);
+        saveWardrobe();
+        renderInventoryUI();
+        renderDirectory();
+        generateStrictNoRepeatOutfits();
+        renderMatrix();
+      };
+
+      list.appendChild(row);
+    });
+
+    box.appendChild(list);
+    container.appendChild(box);
+  }
+}
+
+document.getElementById("btnAddItem").onclick = () => {
+  const nameInput = document.getElementById("newItemName");
+  const typeSelect = document.getElementById("newItemType");
+  const hexInput = document.getElementById("newItemHex");
+  const msg = document.getElementById("itemActionMessage");
+
+  let name = nameInput.value.trim();
+  let cat = typeSelect.value;
+  let hex = hexInput.value.trim();
+
+  if (!name) {
+    msg.textContent = "Please enter an item name.";
+    return;
+  }
+  if (hex && !/^#[0-9a-fA-F]{6}$/.test(hex)) {
+    msg.textContent = "Hex colour must be in format #RRGGBB (e.g. #317A78).";
+    return;
+  }
+
+  let finalHex = hex || "#555D42";
+  wardrobeData[cat].push({
+    id: cat + '_' + Date.now(),
+    name,
+    hex: finalHex
+  });
+
+  saveWardrobe();
+  nameInput.value = "";
+  hexInput.value = "";
+  msg.textContent = `Added "${name}" to ${cat}!`;
+  renderInventoryUI();
+  initMatrixGarmentsDropdown();
+  renderDirectory();
+  generateStrictNoRepeatOutfits();
+  renderMatrix();
+};
+
+document.getElementById("btnResetWardrobe").onclick = () => {
+  if (confirm("Reset clothing inventory back to factory default?")) {
+    wardrobeData = createFreshInventory();
+    saveWardrobe();
+    renderInventoryUI();
+    initMatrixGarmentsDropdown();
+    renderDirectory();
+    generateStrictNoRepeatOutfits();
+    renderMatrix();
+    document.getElementById("itemActionMessage").textContent = "Starter wardrobe restored.";
+  }
+};
+
+document.getElementById("btnExport").onclick = () => {
+  const blob = new Blob([JSON.stringify(wardrobeData, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "wardrobe-backup.json";
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById("btnImport").onclick = () => {
+  document.getElementById("backupFileInput").click();
+};
+
+document.getElementById("backupFileInput").onchange = async (e) => {
+  try {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    const data = JSON.parse(text);
+    for (let k of Object.keys(STARTER_WARDROBE)) {
+      if (!Array.isArray(data[k])) throw new Error();
+    }
+    wardrobeData = data;
+    saveWardrobe();
+    renderInventoryUI();
+    initMatrixGarmentsDropdown();
+    renderDirectory();
+    generateStrictNoRepeatOutfits();
+    renderMatrix();
+    alert("Wardrobe backup successfully restored!");
+  } catch (err) {
+    alert("Invalid backup file.");
+  }
+  e.target.value = "";
+};
+
+// ================= 10. MODAL INSPECTOR =================
+function openModalInspector(data) {
+  const modal = document.getElementById("inspectorModal");
+  const sText = getContrastColor(data.shirtHex);
+  const tText = getContrastColor(data.trouserHex);
+
+  document.getElementById("modalSwatchesView").innerHTML = `
+    <div class="modal-swatch-half" style="background:${data.shirtHex};color:${sText};">
+      <span>👔 Top: ${data.shirt}</span>
+      <span style="font-family:monospace;font-size:0.75rem;">${data.shirtHex}</span>
+    </div>
+    <div class="modal-leather-seam" style="background:${data.leatherHex};" title="${data.leather} Belt Anchor"></div>
+    <div class="modal-swatch-half" style="background:${data.trouserHex};color:${tText};">
+      <span>👖 Bottom: ${data.trouser}</span>
+      <span style="font-family:monospace;font-size:0.75rem;">${data.trouserHex}</span>
+    </div>
+  `;
+
+  document.getElementById("modalMeta").textContent = data.meta;
+  document.getElementById("modalTierBadge").className = `tier-badge ${data.tier.toLowerCase()}`;
+  document.getElementById("modalTierBadge").textContent = (data.tier === 'PEAK' ? '🔥 PEAK' : data.tier === 'GOOD' ? '✨ GOOD' : '⚖️ MID');
+  document.getElementById("modalTitle").textContent = `${data.shirt} & ${data.trouser}`;
+  document.getElementById("modalWadaName").textContent = `Sanzo Wada Archetype: ${data.wada}`;
+  document.getElementById("modalRationale").textContent = data.rationale;
+  document.getElementById("modalLeatherInfo").innerHTML = `<strong>Leather Anchor:</strong> ${data.leather} Shoes &amp; Belt`;
+
+  modal.classList.add("open");
+}
+
+document.getElementById("btnCloseModal").onclick = () => {
+  document.getElementById("inspectorModal").classList.remove("open");
+};
+
+document.getElementById("inspectorModal").onclick = (e) => {
+  if (e.target.id === "inspectorModal") {
+    document.getElementById("inspectorModal").classList.remove("open");
+  }
+};
+
+// ================= 11. VIEW SWITCHING & LISTENERS =================
+function switchView(viewName) {
+  document.getElementById("viewMatrix").style.display = (viewName === 'matrix') ? 'block' : 'none';
+  document.getElementById("viewDirectory").style.display = (viewName === 'directory') ? 'block' : 'none';
+  document.getElementById("viewGenerator").style.display = (viewName === 'generator') ? 'block' : 'none';
+  document.getElementById("viewManage").style.display = (viewName === 'manage') ? 'block' : 'none';
+
+  document.getElementById("tabBtnMatrix").classList.toggle("active", viewName === 'matrix');
+  document.getElementById("tabBtnDirectory").classList.toggle("active", viewName === 'directory');
+  document.getElementById("tabBtnGenerator").classList.toggle("active", viewName === 'generator');
+  document.getElementById("tabBtnManage").classList.toggle("active", viewName === 'manage');
+
+  if (viewName === 'directory') renderDirectory();
+  if (viewName === 'matrix') renderMatrix();
+  if (viewName === 'generator') syncPreferenceInputs(document.getElementById("genOccasion").value);
+}
+
+// Matrix Garment Type Filters (Shirts vs Sweatshirts, Trousers vs Cargos)
+document.getElementById("matrixTopFilter").addEventListener("change", (e) => {
+  matrixFilterState.topType = e.target.value;
+  renderMatrix();
+});
+
+document.getElementById("matrixBottomFilter").addEventListener("change", (e) => {
+  matrixFilterState.bottomType = e.target.value;
+  renderMatrix();
+});
+
+// Matrix Week Pills
+document.querySelectorAll("#weekPills .pill-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#weekPills .pill-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    matrixFilterState.week = btn.dataset.week;
+    renderMatrix();
+  });
+});
+
+// Matrix Harmony Pills
+document.querySelectorAll("#harmonyPills .pill-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#harmonyPills .pill-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    matrixFilterState.harmony = btn.dataset.harmony;
+    renderMatrix();
+  });
+});
+
+document.getElementById("matrixGarmentFilter").addEventListener("change", e => {
+  matrixFilterState.garment = e.target.value;
+  renderMatrix();
+});
+
+document.getElementById("resetMatrixFilters").addEventListener("click", () => {
+  matrixFilterState = { topType: "all", bottomType: "all", week: "all", harmony: "all", garment: "all" };
+  document.getElementById("matrixTopFilter").value = "all";
+  document.getElementById("matrixBottomFilter").value = "all";
+  document.getElementById("matrixGarmentFilter").value = "all";
+  document.querySelectorAll("#weekPills .pill-btn").forEach((b, i) => b.classList.toggle("active", i === 0));
+  document.querySelectorAll("#harmonyPills .pill-btn").forEach((b, i) => b.classList.toggle("active", i === 0));
+  renderMatrix();
+});
+
+// Directory Tier Pills
+document.querySelectorAll("#dirTierPills .pill-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#dirTierPills .pill-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    dirFilterState.tier = btn.dataset.tier;
+    renderDirectory();
+  });
+});
+
+document.getElementById("dirTopTypeFilter").onchange = (e) => {
+  dirFilterState.topType = e.target.value;
+  renderDirectory();
+};
+
+document.getElementById("dirBottomTypeFilter").onchange = (e) => {
+  dirFilterState.bottomType = e.target.value;
+  renderDirectory();
+};
+
+// Generator triggers
+document.getElementById("btnGenerateWeekly").onclick = generateStrictNoRepeatOutfits;
+document.getElementById("btnRegenerateWeekly").onclick = generateStrictNoRepeatOutfits;
+document.getElementById("genDaysCount").onchange = generateStrictNoRepeatOutfits;
+document.getElementById("genTierFilter").onchange = generateStrictNoRepeatOutfits;
+document.getElementById("genTopType").onchange = generateStrictNoRepeatOutfits;
+document.getElementById("genBottomType").onchange = generateStrictNoRepeatOutfits;
+document.getElementById("genPalette").onchange = generateStrictNoRepeatOutfits;
+
+// ================= 12. INITIALIZATION =================
+initMatrixGarmentsDropdown();
+setupCategoryPrefsUI();
+renderMatrix();
+renderDirectory();
+generateStrictNoRepeatOutfits();
+renderInventoryUI();
+</script>
+</body>
+</html>
